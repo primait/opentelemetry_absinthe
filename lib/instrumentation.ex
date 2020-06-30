@@ -32,8 +32,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   end
 
   def handle_operation_stop(event_name, _measurements, data, _) do
-    OpenTelemetry.Span.set_attribute("graphql.response.errors", inspect(data.blueprint.errors))
-    OpenTelemetry.Span.set_attribute("graphql.response.result", inspect(data.blueprint.result))
+    OpenTelemetry.Span.set_attribute("graphql.response.errors", Jason.encode!(data.blueprint.errors))
+    OpenTelemetry.Span.set_attribute("graphql.response.result", Jason.encode!(data.blueprint.result))
     OpenTelemetry.Tracer.end_span()
     :ok
   end
