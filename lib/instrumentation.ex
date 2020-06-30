@@ -19,23 +19,21 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     )
   end
 
-  def handle_operation_start(event_name, _measurements, %{
-        options: %{params: %{"query" => query, "variables" => variables}}
-      }, _) do
+  def handle_operation_start(event_name, _measurements, metadata, _) do
+    params = metadata |> Map.get(:options, []) |> Keyword.get(:params, %{})
+
     attributes = [
-      {"graphql.query", query},
-      {"graphql.variables", variables}
+      {"graphql.request.query", params["query"]},
+      {"graphql.request.variables", Jason.encode!(params["variables"])}
     ]
 
-    OpenTelemetry.Tracer.start_span("graphql", %{attributes: attributes})
+    OpenTelemetry.Tracer.start_span("absinthe graphql resolution", %{attributes: attributes})
     :ok
   end
 
-  def handle_operation_start(_, _, _, _), do: :ok
-
   def handle_operation_stop(event_name, _measurements, data, _) do
-    OpenTelemetry.Span.set_attribute("graphql.errors", inspect(data.blueprint.errors))
-    OpenTelemetry.Span.set_attribute("graphql.response", inspect(data.blueprint.result))
+    OpenTelemetry.Span.set_attribute("graphql.response.errors", inspect(data.blueprint.errors))
+    OpenTelemetry.Span.set_attribute("graphql.response.result", inspect(data.blueprint.result))
     OpenTelemetry.Tracer.end_span()
     :ok
   end
