@@ -48,8 +48,13 @@ defmodule OpentelemetryAbsinthe.Helpers do
     {:middleware, Absinthe.Middleware.Batch, batch_config}
   end
 
-  # This is executed by the Absinthe.Middleware.Batch middleware in a Task
-  defp batch_fun_wrapper({{module, func, param}, span}, aggregate) do
+  @doc """
+  Wrapper around the "real" batch function used by `batch_keep_span`
+
+  Takes the passed span and sets it as the active one, then calls the original
+  batch function with the original parameter.
+  """
+  def batch_fun_wrapper({{module, func, param}, span}, aggregate) do
     OpenTelemetry.Tracer.set_span(span)
     apply(module, func, [param, aggregate])
   end
