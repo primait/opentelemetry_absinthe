@@ -34,6 +34,11 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     )
   end
 
+  def teardown() do
+    :telemetry.detach({__MODULE__, :operation_start})
+    :telemetry.detach({__MODULE__, :operation_stop})
+  end
+
   def handle_operation_start(_event_name, _measurements, metadata, config) do
     params = metadata |> Map.get(:options, []) |> Keyword.get(:params, %{})
 

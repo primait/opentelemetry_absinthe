@@ -22,6 +22,9 @@ defmodule OpentelemetryAbsinthe.MixProject do
       {:absinthe, ">= 1.4.0"},
       {:jason, "~> 1.2"},
       {:opentelemetry_api, "~> 0.3.1"},
+      {:absinthe_plug, "~> 1.5", only: :test},
+      {:opentelemetry, "~> 0.4.0", only: :test},
+      {:plug_cowboy, "~> 2.2", only: :test}
     ]
   end
 end
