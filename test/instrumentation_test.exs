@@ -9,8 +9,6 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
     Record.defrecord(name, spec)
   end
 
-  # Application.put_env(:opentelemetry_absinthe, :trace_options, [trace_request_query: false])
-
   @query """
   query($isbn: String!) {
     book(isbn: $isbn) {
