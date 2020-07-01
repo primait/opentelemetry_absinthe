@@ -3,7 +3,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
   alias AbsinthePlug.Test.Schema
   require Record
 
-  doctest OpentelemetryAbsinthe
+  doctest OpentelemetryAbsinthe.Instrumentation
 
   for {name, spec} <- Record.extract_all(from_lib: "opentelemetry/include/ot_span.hrl") do
     Record.defrecord(name, spec)
