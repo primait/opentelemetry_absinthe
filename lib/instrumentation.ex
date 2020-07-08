@@ -1,4 +1,14 @@
 defmodule OpentelemetryAbsinthe.Instrumentation do
+  @moduledoc """
+  Module for automatic instrumentation of Absinthe resolution.
+
+  It works by listening to [:absinthe, :execute, :operation, :start/:stop] telemetry events,
+  which are emitted by Absinthe only since v1.5; therefore it won't work on previous versions.
+
+  (you can still call `OpentelemetryAbsinthe.Instrumentation.setup()` in your application startup
+  code, it just won't do anything.)
+  """
+
   require OpenTelemetry.Tracer
   require OpenTelemetry.Span
 
