@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if [ "$1" == "mix" ]; then
+  exec "$@"
+else [ -n "$1" ];
+  sh -c "$@"
+fi

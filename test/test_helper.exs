@@ -30,7 +30,7 @@ defmodule AbsinthePlug.Test.Schema do
     field :book, :book do
       arg(:isbn, non_null(:string))
       # middleware OpentelemetryAbsinthe.Middleware
-      resolve(fn _parent, args, resolution ->
+      resolve(fn _parent, args, _resolution ->
         {:ok, get_book_by_isbn(args.isbn)}
       end)
     end
