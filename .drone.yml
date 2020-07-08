@@ -1,0 +1,285 @@
+---
+kind: pipeline
+name: default
+
+platform:
+  os: linux
+  arch: amd64
+
+clone:
+  depth: 1
+
+steps:
+- name: pre-start
+  image: prima/drone-tools:1.17.6
+  commands:
+  - pre-start-scripts
+
+- name: cache-restore
+  image: prima/drone-tools:1.17.6
+  commands:
+  - . /etc/profile.d/ecs-credentials-endpoint
+  - cache-restore
+  volumes:
+  - name: ecs
+    path: /etc/profile.d/ecs-credentials-endpoint
+  - name: docker
+    path: /var/run/docker.sock
+
+- name: check-secrets
+  image: prima/drone-tools:1.17.6
+  commands:
+  - . /etc/profile.d/ecs-credentials-endpoint
+  - check-secrets-grants
+  volumes:
+  - name: ecs
+    path: /etc/profile.d/ecs-credentials-endpoint
+
+- name: build-image
+  image: prima/drone-tools:1.17.6
+  commands:
+  - sed -i 's/USER app/USER root/g' ./Dockerfile
+  - docker build -t prima/opentelemetry_absinthe-ci:1 ./
+  volumes:
+  - name: docker
+    path: /var/run/docker.sock
+  depends_on:
+  - cache-restore
+
+- name: elixir-dependencies
+  image: prima/opentelemetry_absinthe-ci:1
+  commands:
+  - mix deps.get
+  depends_on:
+  - build-image
+
+- name: elixir-compile
+  image: prima/opentelemetry_absinthe-ci:1
+  commands:
+  - mix compile --all-warnings --warnings-as-errors --ignore-module-conflict --debug-info
+  environment:
+    MIX_ENV: test
+  depends_on:
+  - elixir-dependencies
+
+- name: elixir-format
+  image: prima/opentelemetry_absinthe-ci:1
+  commands:
+  - mix format --check-formatted mix.exs "lib/**/*.{ex,exs}" "test/**/*.{ex,exs}" "config/**/*.{ex,exs}"
+  environment:
+    MIX_ENV: test
+  depends_on:
+  - elixir-compile
+
+- name: elixir-test
+  image: prima/opentelemetry_absinthe-ci:1
+  commands:
+  - mix test
+  environment:
+    MIX_ENV: test
+  depends_on:
+  - elixir-compile
+
+- name: elixir-credo
+  image: prima/opentelemetry_absinthe-ci:1
+  commands:
+  - mix credo -a --strict
+  environment:
+    MIX_ENV: test
+  depends_on:
+  - elixir-compile
+
+- name: elixir-dialyzer
+  image: prima/opentelemetry_absinthe-ci:1
+  commands:
+  - mix dialyzer
+  environment:
+    MIX_ENV: test
+  depends_on:
+  - elixir-compile
+
+- name: cache-save
+  image: prima/drone-tools:1.17.6
+  commands:
+  - . /etc/profile.d/ecs-credentials-endpoint
+  - cache-save _build deps
+  volumes:
+  - name: ecs
+    path: /etc/profile.d/ecs-credentials-endpoint
+  - name: docker
+    path: /var/run/docker.sock
+  when:
+    branch:
+    - master
+  depends_on:
+  - elixir-compile
+  - elixir-format
+  - elixir-test
+  - elixir-credo
+  - elixir-dialyzer
+
+volumes:
+- name: docker
+  host:
+    path: /var/run/docker.sock
+- name: ecs
+  host:
+    path: /etc/profile.d/ecs-credentials-endpoint
+
+trigger:
+  event:
+  - push
+
+---
+kind: pipeline
+name: deploy
+
+platform:
+  os: linux
+  arch: amd64
+
+clone:
+  depth: 1
+
+steps:
+- name: pre-start
+  image: prima/drone-tools:1.17.6
+  commands:
+  - pre-start-scripts
+
+- name: cache-restore
+  image: prima/drone-tools:1.17.6
+  commands:
+  - . /etc/profile.d/ecs-credentials-endpoint
+  - cache-restore
+  volumes:
+  - name: ecs
+    path: /etc/profile.d/ecs-credentials-endpoint
+  - name: docker
+    path: /var/run/docker.sock
+
+- name: check-secrets
+  image: prima/drone-tools:1.17.6
+  commands:
+  - . /etc/profile.d/ecs-credentials-endpoint
+  - check-secrets-grants
+  volumes:
+  - name: ecs
+    path: /etc/profile.d/ecs-credentials-endpoint
+
+- name: build-image
+  image: prima/drone-tools:1.17.6
+  commands:
+  - sed -i 's/USER app/USER root/g' ./Dockerfile
+  - docker build -t prima/opentelemetry_absinthe-ci:1 ./
+  volumes:
+  - name: docker
+    path: /var/run/docker.sock
+  depends_on:
+  - cache-restore
+
+- name: deploy-production
+  image: prima/opentelemetry_absinthe-ci:1
+  commands:
+  - . /etc/profile.d/ecs-credentials-endpoint
+  - ./deploy/deploy production ${DRONE_TAG}
+  environment:
+    HEX_AUTH_KEY:
+      from_secret: hex_auth_key
+    MIX_ENV: dev
+  volumes:
+  - name: ecs
+    path: /etc/profile.d/ecs-credentials-endpoint
+  depends_on:
+  - check-secrets
+  - build-image
+
+- name: wait-for-stack-production
+  image: prima/drone-tools:1.17.6
+  commands:
+  - . /etc/profile.d/ecs-credentials-endpoint
+  - ./deploy/wait_for_stack production ${DRONE_TAG}
+  volumes:
+  - name: ecs
+    path: /etc/profile.d/ecs-credentials-endpoint
+  depends_on:
+  - deploy-production
+
+volumes:
+- name: docker
+  host:
+    path: /var/run/docker.sock
+- name: ecs
+  host:
+    path: /etc/profile.d/ecs-credentials-endpoint
+
+trigger:
+  event:
+  - tag
+
+---
+kind: pipeline
+name: email-failure
+
+platform:
+  os: linux
+  arch: amd64
+
+clone:
+  disable: true
+
+steps:
+- name: email-failure
+  image: drillster/drone-email
+  settings:
+    from: noreply@prima.it
+    host: email-smtp.eu-west-1.amazonaws.com
+  environment:
+    PLUGIN_PASSWORD:
+      from_secret: email_password
+    PLUGIN_USERNAME:
+      from_secret: email_username
+
+trigger:
+  event:
+  - push
+  status:
+  - failure
+
+depends_on:
+- default
+
+---
+kind: pipeline
+name: notify-captainhook-production
+
+platform:
+  os: linux
+  arch: amd64
+
+clone:
+  disable: true
+
+steps:
+- name: send
+  image: plugins/webhook
+  settings:
+    signature-secret:
+      from_secret: captainhook_secret
+    urls: http://captainhook-internal.prima.it/drone/deploy
+
+trigger:
+  event:
+  - tag
+  status:
+  - success
+  - failure
+
+depends_on:
+- deploy
+
+---
+kind: signature
+hmac: 0ccbbdf6b0cfca75d5d7baddbd546a1b6364131ebaee6df5cb692b93e54d95e2
+
+...
