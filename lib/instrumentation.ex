@@ -63,7 +63,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       )
       |> put_if(
         config.trace_response_errors,
-        {"graphql.response.errors", Jason.encode!(data.blueprint.result.errors)}
+        {"graphql.response.errors", Jason.encode!(data.blueprint.result[:errors])}
       )
 
     OpenTelemetry.Span.set_attributes(result_attributes)
