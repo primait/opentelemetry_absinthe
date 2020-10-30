@@ -1,4 +1,4 @@
-FROM prima/elixir-official:1.10.2-1
+FROM 001575623345.dkr.ecr.eu-west-1.amazonaws.com/elixir-official:1.10.2-1
 
 WORKDIR /code
 
