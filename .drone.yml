@@ -11,23 +11,29 @@ clone:
 
 steps:
 - name: pre-start
-  image: prima/drone-tools:1.17.6
+  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - pre-start-scripts
+  environment:
+    COUNTRY: it
 
 - name: cache-restore
-  image: prima/drone-tools:1.17.6
+  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
   - cache-restore
+  environment:
+    COUNTRY: it
   volumes:
   - name: ecs
     path: /etc/profile.d/ecs-credentials-endpoint
   - name: docker
     path: /var/run/docker.sock
+  - name: docker-conf
+    path: /root/.docker
 
 - name: check-secrets
-  image: prima/drone-tools:1.17.6
+  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
   - check-secrets-grants
@@ -36,13 +42,15 @@ steps:
     path: /etc/profile.d/ecs-credentials-endpoint
 
 - name: build-image
-  image: prima/drone-tools:1.17.6
+  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - sed -i 's/USER app/USER root/g' ./Dockerfile
   - docker build -t prima/opentelemetry_absinthe-ci:1 ./
   volumes:
   - name: docker
     path: /var/run/docker.sock
+  - name: docker-conf
+    path: /root/.docker
   depends_on:
   - cache-restore
 
@@ -51,6 +59,7 @@ steps:
   commands:
   - mix deps.get
   depends_on:
+  - pre-start
   - build-image
 
 - name: elixir-compile
@@ -65,7 +74,7 @@ steps:
 - name: elixir-format
   image: prima/opentelemetry_absinthe-ci:1
   commands:
-  - mix format --check-formatted mix.exs "lib/**/*.{ex,exs}" "test/**/*.{ex,exs}" "config/**/*.{ex,exs}"
+  - mix format --check-formatted
   environment:
     MIX_ENV: test
   depends_on:
@@ -99,15 +108,19 @@ steps:
   - elixir-compile
 
 - name: cache-save
-  image: prima/drone-tools:1.17.6
+  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
   - cache-save _build deps
+  environment:
+    COUNTRY: it
   volumes:
   - name: ecs
     path: /etc/profile.d/ecs-credentials-endpoint
   - name: docker
     path: /var/run/docker.sock
+  - name: docker-conf
+    path: /root/.docker
   when:
     branch:
     - master
@@ -125,6 +138,9 @@ volumes:
 - name: ecs
   host:
     path: /etc/profile.d/ecs-credentials-endpoint
+- name: docker-conf
+  host:
+    path: /home/ec2-user/.docker
 
 trigger:
   event:
@@ -143,23 +159,29 @@ clone:
 
 steps:
 - name: pre-start
-  image: prima/drone-tools:1.17.6
+  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - pre-start-scripts
+  environment:
+    COUNTRY: it
 
 - name: cache-restore
-  image: prima/drone-tools:1.17.6
+  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
   - cache-restore
+  environment:
+    COUNTRY: it
   volumes:
   - name: ecs
     path: /etc/profile.d/ecs-credentials-endpoint
   - name: docker
     path: /var/run/docker.sock
+  - name: docker-conf
+    path: /root/.docker
 
 - name: check-secrets
-  image: prima/drone-tools:1.17.6
+  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
   - check-secrets-grants
@@ -168,13 +190,15 @@ steps:
     path: /etc/profile.d/ecs-credentials-endpoint
 
 - name: build-image
-  image: prima/drone-tools:1.17.6
+  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - sed -i 's/USER app/USER root/g' ./Dockerfile
   - docker build -t prima/opentelemetry_absinthe-ci:1 ./
   volumes:
   - name: docker
     path: /var/run/docker.sock
+  - name: docker-conf
+    path: /root/.docker
   depends_on:
   - cache-restore
 
@@ -194,17 +218,6 @@ steps:
   - check-secrets
   - build-image
 
-- name: wait-for-stack-production
-  image: prima/drone-tools:1.17.6
-  commands:
-  - . /etc/profile.d/ecs-credentials-endpoint
-  - ./deploy/wait_for_stack production ${DRONE_TAG}
-  volumes:
-  - name: ecs
-    path: /etc/profile.d/ecs-credentials-endpoint
-  depends_on:
-  - deploy-production
-
 volumes:
 - name: docker
   host:
@@ -212,10 +225,15 @@ volumes:
 - name: ecs
   host:
     path: /etc/profile.d/ecs-credentials-endpoint
+- name: docker-conf
+  host:
+    path: /home/ec2-user/.docker
 
 trigger:
   event:
   - tag
+  ref:
+  - refs/tags/*.*.*
 
 ---
 kind: pipeline
@@ -262,7 +280,7 @@ clone:
 
 steps:
 - name: send
-  image: plugins/webhook
+  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-webhook
   settings:
     signature-secret:
       from_secret: captainhook_secret
@@ -280,6 +298,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 0ccbbdf6b0cfca75d5d7baddbd546a1b6364131ebaee6df5cb692b93e54d95e2
+hmac: 2d218a1631519c713fcde9d7acba67a3197975a23cbee458ced5d27cecbc002c
 
 ...
