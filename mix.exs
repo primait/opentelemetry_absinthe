@@ -9,6 +9,7 @@ defmodule OpentelemetryAbsinthe.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
+      aliases: aliases(),
       description: description()
     ]
   end
@@ -30,6 +31,14 @@ defmodule OpentelemetryAbsinthe.MixProject do
       {:credo, "~> 1.4", only: [:dev, :test]},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+    ]
+  end
+
+  defp aliases do
+    [
+      "format.all": [
+        "format mix.exs \"lib/**/*.{ex,exs}\" \"test/**/*.{ex,exs}\" \"priv/**/*.{ex,exs}\" \"config/**/*.{ex,exs}\""
+      ]
     ]
   end
 
