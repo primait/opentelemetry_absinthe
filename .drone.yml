@@ -7,18 +7,25 @@ platform:
   arch: amd64
 
 clone:
-  depth: 1
+  disable: true
 
 steps:
+- name: git-clone
+  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-git:1.3-3
+  environment:
+    PLUGIN_DEPTH: 5
+
 - name: pre-start
-  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.12
+  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - pre-start-scripts
   environment:
     COUNTRY: it
+  depends_on:
+  - git-clone
 
 - name: cache-restore
-  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.12
+  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
   - cache-restore
@@ -29,18 +36,24 @@ steps:
     path: /etc/profile.d/ecs-credentials-endpoint
   - name: docker
     path: /var/run/docker.sock
+  - name: docker-conf
+    path: /root/.docker
+  depends_on:
+  - git-clone
 
 - name: check-secrets
-  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.12
+  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
   - check-secrets-grants
   volumes:
   - name: ecs
     path: /etc/profile.d/ecs-credentials-endpoint
+  depends_on:
+  - git-clone
 
 - name: build-image
-  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.12
+  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - sed -i 's/USER app/USER root/g' ./Dockerfile
   - docker build -t prima/opentelemetry_absinthe-ci:1 ./
@@ -106,7 +119,7 @@ steps:
   - elixir-compile
 
 - name: cache-save
-  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.12
+  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
   - cache-save _build deps
@@ -117,6 +130,8 @@ steps:
     path: /etc/profile.d/ecs-credentials-endpoint
   - name: docker
     path: /var/run/docker.sock
+  - name: docker-conf
+    path: /root/.docker
   when:
     branch:
     - master
@@ -151,18 +166,25 @@ platform:
   arch: amd64
 
 clone:
-  depth: 1
+  disable: true
 
 steps:
+- name: git-clone
+  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-git:1.3-3
+  environment:
+    PLUGIN_DEPTH: 5
+
 - name: pre-start
-  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.12
+  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - pre-start-scripts
   environment:
     COUNTRY: it
+  depends_on:
+  - git-clone
 
 - name: cache-restore
-  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.12
+  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
   - cache-restore
@@ -173,18 +195,24 @@ steps:
     path: /etc/profile.d/ecs-credentials-endpoint
   - name: docker
     path: /var/run/docker.sock
+  - name: docker-conf
+    path: /root/.docker
+  depends_on:
+  - git-clone
 
 - name: check-secrets
-  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.12
+  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
   - check-secrets-grants
   volumes:
   - name: ecs
     path: /etc/profile.d/ecs-credentials-endpoint
+  depends_on:
+  - git-clone
 
 - name: build-image
-  image: 001575623345.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.12
+  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
   commands:
   - sed -i 's/USER app/USER root/g' ./Dockerfile
   - docker build -t prima/opentelemetry_absinthe-ci:1 ./
@@ -274,7 +302,7 @@ clone:
 
 steps:
 - name: send
-  image: prima/drone-webhook
+  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-webhook
   settings:
     signature-secret:
       from_secret: captainhook_secret
@@ -292,6 +320,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 1738a187b4b9494e2a38825bbbd9a3b2f33d3a9b8e5bd9d4c2387252dfc2fe3c
+hmac: 831c96b7baa6b814da0e3fa21b4784f2c58db9c00b5c35a2ad9d8985ba165377
 
 ...
