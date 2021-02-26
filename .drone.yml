@@ -11,26 +11,17 @@ clone:
 
 steps:
 - name: git-clone
-  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-git:1.3-3
+  image: public.ecr.aws/prima/drone-git:1.3-3
   environment:
     PLUGIN_DEPTH: 5
 
-- name: pre-start
-  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
-  commands:
-  - pre-start-scripts
-  environment:
-    COUNTRY: it
-  depends_on:
-  - git-clone
-
 - name: cache-restore
-  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
+  image: public.ecr.aws/prima/drone-tools:1.20.1
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
   - cache-restore
   environment:
-    COUNTRY: it
+    BUCKET_NAME: prima-ci-cache
   volumes:
   - name: ecs
     path: /etc/profile.d/ecs-credentials-endpoint
@@ -42,7 +33,7 @@ steps:
   - git-clone
 
 - name: check-secrets
-  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
+  image: public.ecr.aws/prima/drone-tools:1.20.1
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
   - check-secrets-grants
@@ -52,11 +43,18 @@ steps:
   depends_on:
   - git-clone
 
+- name: check-public-docker-images
+  image: public.ecr.aws/prima/drone-tools:1.20.1
+  commands:
+  - check-public-docker-images
+  depends_on:
+  - git-clone
+
 - name: build-image
-  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
+  image: public.ecr.aws/prima/drone-tools:1.20.1
   commands:
   - sed -i 's/USER app/USER root/g' ./Dockerfile
-  - docker build -t prima/opentelemetry_absinthe-ci:1 ./
+  - docker build -t prima/opentelemetry_absinthe-ci:${DRONE_COMMIT} ./
   volumes:
   - name: docker
     path: /var/run/docker.sock
@@ -66,15 +64,14 @@ steps:
   - cache-restore
 
 - name: elixir-dependencies
-  image: prima/opentelemetry_absinthe-ci:1
+  image: prima/opentelemetry_absinthe-ci:${DRONE_COMMIT}
   commands:
   - mix deps.get
   depends_on:
-  - pre-start
   - build-image
 
 - name: elixir-compile
-  image: prima/opentelemetry_absinthe-ci:1
+  image: prima/opentelemetry_absinthe-ci:${DRONE_COMMIT}
   commands:
   - mix compile --all-warnings --warnings-as-errors --ignore-module-conflict --debug-info
   environment:
@@ -83,7 +80,7 @@ steps:
   - elixir-dependencies
 
 - name: elixir-format
-  image: prima/opentelemetry_absinthe-ci:1
+  image: prima/opentelemetry_absinthe-ci:${DRONE_COMMIT}
   commands:
   - mix format --check-formatted
   environment:
@@ -92,7 +89,7 @@ steps:
   - elixir-compile
 
 - name: elixir-test
-  image: prima/opentelemetry_absinthe-ci:1
+  image: prima/opentelemetry_absinthe-ci:${DRONE_COMMIT}
   commands:
   - mix test
   environment:
@@ -101,7 +98,7 @@ steps:
   - elixir-compile
 
 - name: elixir-credo
-  image: prima/opentelemetry_absinthe-ci:1
+  image: prima/opentelemetry_absinthe-ci:${DRONE_COMMIT}
   commands:
   - mix credo -a --strict
   environment:
@@ -110,7 +107,7 @@ steps:
   - elixir-compile
 
 - name: elixir-dialyzer
-  image: prima/opentelemetry_absinthe-ci:1
+  image: prima/opentelemetry_absinthe-ci:${DRONE_COMMIT}
   commands:
   - mix dialyzer
   environment:
@@ -119,12 +116,12 @@ steps:
   - elixir-compile
 
 - name: cache-save
-  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
+  image: public.ecr.aws/prima/drone-tools:1.20.1
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
   - cache-save _build deps
   environment:
-    COUNTRY: it
+    BUCKET_NAME: prima-ci-cache
   volumes:
   - name: ecs
     path: /etc/profile.d/ecs-credentials-endpoint
@@ -159,7 +156,7 @@ trigger:
 
 ---
 kind: pipeline
-name: deploy
+name: build-production
 
 platform:
   os: linux
@@ -170,26 +167,17 @@ clone:
 
 steps:
 - name: git-clone
-  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-git:1.3-3
+  image: public.ecr.aws/prima/drone-git:1.3-3
   environment:
     PLUGIN_DEPTH: 5
 
-- name: pre-start
-  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
-  commands:
-  - pre-start-scripts
-  environment:
-    COUNTRY: it
-  depends_on:
-  - git-clone
-
 - name: cache-restore
-  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
+  image: public.ecr.aws/prima/drone-tools:1.20.1
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
   - cache-restore
   environment:
-    COUNTRY: it
+    BUCKET_NAME: prima-ci-cache
   volumes:
   - name: ecs
     path: /etc/profile.d/ecs-credentials-endpoint
@@ -197,25 +185,14 @@ steps:
     path: /var/run/docker.sock
   - name: docker-conf
     path: /root/.docker
-  depends_on:
-  - git-clone
-
-- name: check-secrets
-  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
-  commands:
-  - . /etc/profile.d/ecs-credentials-endpoint
-  - check-secrets-grants
-  volumes:
-  - name: ecs
-    path: /etc/profile.d/ecs-credentials-endpoint
   depends_on:
   - git-clone
 
 - name: build-image
-  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-tools:1.17.16
+  image: public.ecr.aws/prima/drone-tools:1.20.1
   commands:
   - sed -i 's/USER app/USER root/g' ./Dockerfile
-  - docker build -t prima/opentelemetry_absinthe-ci:1 ./
+  - docker build -t prima/opentelemetry_absinthe-ci:${DRONE_COMMIT} ./
   volumes:
   - name: docker
     path: /var/run/docker.sock
@@ -224,20 +201,15 @@ steps:
   depends_on:
   - cache-restore
 
-- name: deploy-production
-  image: prima/opentelemetry_absinthe-ci:1
+- name: build-production
+  image: prima/opentelemetry_absinthe-ci:${DRONE_COMMIT}
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
-  - ./deploy/deploy production ${DRONE_TAG}
-  environment:
-    HEX_AUTH_KEY:
-      from_secret: hex_auth_key
-    MIX_ENV: dev
+  - ./deploy/build production
   volumes:
   - name: ecs
     path: /etc/profile.d/ecs-credentials-endpoint
   depends_on:
-  - check-secrets
   - build-image
 
 volumes:
@@ -259,6 +231,71 @@ trigger:
 
 ---
 kind: pipeline
+name: deploy-it-production
+
+platform:
+  os: linux
+  arch: amd64
+
+clone:
+  disable: true
+
+steps:
+- name: git-clone
+  image: public.ecr.aws/prima/drone-git:1.3-3
+  environment:
+    PLUGIN_DEPTH: 5
+
+- name: pre-start
+  image: public.ecr.aws/prima/drone-tools:1.20.1
+  commands:
+  - pre-start-scripts
+  depends_on:
+  - git-clone
+
+- name: deploy
+  image: public.ecr.aws/prima/drone-tools:1.20.1
+  commands:
+  - . /etc/profile.d/ecs-credentials-endpoint
+  - ./deploy/deploy-it production
+  environment:
+    HEX_AUTH_KEY:
+      from_secret: hex_auth_key
+    MIX_ENV: dev
+  volumes:
+  - name: ecs
+    path: /etc/profile.d/ecs-credentials-endpoint
+  depends_on:
+  - pre-start
+
+- name: captainhook-notification
+  image: public.ecr.aws/prima/drone-webhook
+  settings:
+    signature-secret:
+      from_secret: captainhook_secret
+    urls: http://captainhook-internal.prima.it/drone/deploy?rollback=${ROLLBACK}
+  depends_on:
+  - deploy
+
+volumes:
+- name: docker
+  host:
+    path: /var/run/docker.sock
+- name: ecs
+  host:
+    path: /etc/profile.d/ecs-credentials-endpoint
+- name: docker-conf
+  host:
+    path: /home/ec2-user/.docker
+
+trigger:
+  event:
+  - promote
+  target:
+  - deploy-it-production
+
+---
+kind: pipeline
 name: email-failure
 
 platform:
@@ -270,7 +307,7 @@ clone:
 
 steps:
 - name: email-failure
-  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-email
+  image: public.ecr.aws/prima/drone-email
   settings:
     from: noreply@prima.it
     host: email-smtp.eu-west-1.amazonaws.com
@@ -281,45 +318,20 @@ steps:
       from_secret: email_username
 
 trigger:
-  event:
-  - push
   status:
   - failure
+  target:
+    exclude:
+    - qa
+    - qa-stack
 
 depends_on:
 - default
-
----
-kind: pipeline
-name: notify-captainhook-production
-
-platform:
-  os: linux
-  arch: amd64
-
-clone:
-  disable: true
-
-steps:
-- name: send
-  image: 595659439703.dkr.ecr.eu-west-1.amazonaws.com/drone-webhook
-  settings:
-    signature-secret:
-      from_secret: captainhook_secret
-    urls: http://captainhook-internal.prima.it/drone/deploy
-
-trigger:
-  event:
-  - tag
-  status:
-  - success
-  - failure
-
-depends_on:
-- deploy
+- build-production
+- deploy-it-production
 
 ---
 kind: signature
-hmac: 5e2b8e257f194583d839cb4a97e5fba606fec1f53f195ada879a8539351ec880
+hmac: 9e8564a0e4df9fa4c5762b854bf135ca353df48a48b7d671f09156fe574113bd
 
 ...
