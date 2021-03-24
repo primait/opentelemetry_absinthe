@@ -79,6 +79,15 @@ steps:
   depends_on:
   - elixir-dependencies
 
+- name: elixir-dep-check
+  image: prima/opentelemetry_absinthe-ci:${DRONE_COMMIT}
+  commands:
+  - mix deps.unlock --check-unused
+  environment:
+    MIX_ENV: test
+  depends_on:
+  - elixir-compile
+
 - name: elixir-format
   image: prima/opentelemetry_absinthe-ci:${DRONE_COMMIT}
   commands:
@@ -138,6 +147,7 @@ steps:
   - elixir-test
   - elixir-credo
   - elixir-dialyzer
+  - elixir-dep-check
 
 volumes:
 - name: docker
@@ -206,6 +216,10 @@ steps:
   commands:
   - . /etc/profile.d/ecs-credentials-endpoint
   - ./deploy/build production
+  environment:
+    HEX_AUTH_KEY:
+      from_secret: hex_auth_key
+    MIX_ENV: dev
   volumes:
   - name: ecs
     path: /etc/profile.d/ecs-credentials-endpoint
@@ -228,71 +242,6 @@ trigger:
   - tag
   ref:
   - refs/tags/*.*.*
-
----
-kind: pipeline
-name: deploy-it-production
-
-platform:
-  os: linux
-  arch: amd64
-
-clone:
-  disable: true
-
-steps:
-- name: git-clone
-  image: public.ecr.aws/prima/drone-git:1.3-3
-  environment:
-    PLUGIN_DEPTH: 5
-
-- name: pre-start
-  image: public.ecr.aws/prima/drone-tools:1.20.1
-  commands:
-  - pre-start-scripts
-  depends_on:
-  - git-clone
-
-- name: deploy
-  image: public.ecr.aws/prima/drone-tools:1.20.1
-  commands:
-  - . /etc/profile.d/ecs-credentials-endpoint
-  - ./deploy/deploy-it production
-  environment:
-    HEX_AUTH_KEY:
-      from_secret: hex_auth_key
-    MIX_ENV: dev
-  volumes:
-  - name: ecs
-    path: /etc/profile.d/ecs-credentials-endpoint
-  depends_on:
-  - pre-start
-
-- name: captainhook-notification
-  image: public.ecr.aws/prima/drone-webhook
-  settings:
-    signature-secret:
-      from_secret: captainhook_secret
-    urls: http://captainhook-internal.prima.it/drone/deploy?rollback=${ROLLBACK}
-  depends_on:
-  - deploy
-
-volumes:
-- name: docker
-  host:
-    path: /var/run/docker.sock
-- name: ecs
-  host:
-    path: /etc/profile.d/ecs-credentials-endpoint
-- name: docker-conf
-  host:
-    path: /home/ec2-user/.docker
-
-trigger:
-  event:
-  - promote
-  target:
-  - deploy-it-production
 
 ---
 kind: pipeline
@@ -328,10 +277,9 @@ trigger:
 depends_on:
 - default
 - build-production
-- deploy-it-production
 
 ---
 kind: signature
-hmac: 9e8564a0e4df9fa4c5762b854bf135ca353df48a48b7d671f09156fe574113bd
+hmac: fff323114e5d03dbbfe5e9e751086ac96d2e46f9f3a34257dc3f22bd17fc6ae4
 
 ...
