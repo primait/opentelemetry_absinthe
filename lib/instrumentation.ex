@@ -9,8 +9,14 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   code, it just won't do anything.)
   """
 
-  require OpenTelemetry.Tracer
-  require OpenTelemetry.Span
+  require OpenTelemetry.Tracer, as: Tracer
+  require Record
+
+  @span_ctx_fields Record.extract(:span_ctx,
+                     from_lib: "opentelemetry_api/include/opentelemetry.hrl"
+                   )
+
+  Record.defrecord(:span_ctx, @span_ctx_fields)
 
   @default_config [
     span_name: "absinthe graphql resolution",
@@ -60,8 +66,11 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       )
       |> put_if(config.trace_request_query, {"graphql.request.query", params["query"]})
 
-    OpenTelemetry.Tracer.start_span(config.span_name, %{attributes: attributes})
-    :ok
+    new_ctx = Tracer.start_span(config.span_name, %{attributes: attributes})
+
+    Tracer.set_current_span(new_ctx)
+
+    Logger.metadata(trace_id: span_ctx(new_ctx, :trace_id), span_id: span_ctx(new_ctx, :span_id))
   end
 
   def handle_operation_stop(_event_name, _measurements, data, config) do
@@ -76,8 +85,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
         {"graphql.response.errors", Jason.encode!(data.blueprint.result[:errors])}
       )
 
-    OpenTelemetry.Span.set_attributes(result_attributes)
-    OpenTelemetry.Tracer.end_span()
+    Tracer.set_attributes(result_attributes)
+    Tracer.end_span()
     :ok
   end
 
