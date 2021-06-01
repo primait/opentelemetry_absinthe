@@ -10,8 +10,8 @@ defmodule OpentelemetryAbsinthe.Helpers do
   but don't lose the trace information.
   """
 
-  require OpenTelemetry.Tracer
   alias Absinthe.Middleware.Batch
+  require OpenTelemetry.Tracer
 
   @doc """
   Works like Absinthe.Resolution.Helpers.batch, but preserves the active span.

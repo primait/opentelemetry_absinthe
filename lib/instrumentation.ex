@@ -50,7 +50,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     )
   end
 
-  def teardown() do
+  def teardown do
     :telemetry.detach({__MODULE__, :operation_start})
     :telemetry.detach({__MODULE__, :operation_stop})
   end
