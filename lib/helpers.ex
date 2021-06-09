@@ -10,8 +10,8 @@ defmodule OpentelemetryAbsinthe.Helpers do
   but don't lose the trace information.
   """
 
-  require OpenTelemetry.Tracer
   alias Absinthe.Middleware.Batch
+  require OpenTelemetry.Tracer
 
   @doc """
   Works like Absinthe.Resolution.Helpers.batch, but preserves the active span.
@@ -55,7 +55,7 @@ defmodule OpentelemetryAbsinthe.Helpers do
   batch function with the original parameter.
   """
   def batch_fun_wrapper({{module, func, param}, span}, aggregate) do
-    OpenTelemetry.Tracer.set_span(span)
+    OpenTelemetry.Tracer.set_current_span(span)
     apply(module, func, [param, aggregate])
   end
 end

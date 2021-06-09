@@ -49,7 +49,7 @@ defmodule AbsinthePlug.Test.Server do
   plug(Absinthe.Plug, schema: AbsinthePlug.Test.Schema)
 end
 
-:ot_batch_processor.set_exporter(:ot_exporter_pid, self())
+:otel_batch_processor.set_exporter(:otel_exporter_pid, self())
 child_spec = [{Plug.Cowboy, scheme: :http, plug: AbsinthePlug.Test.Server, options: [port: 8000]}]
 {:ok, _pid} = Supervisor.start_link(child_spec, strategy: :one_for_one)
 

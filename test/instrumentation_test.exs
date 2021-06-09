@@ -5,7 +5,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
 
   doctest OpentelemetryAbsinthe.Instrumentation
 
-  for {name, spec} <- Record.extract_all(from_lib: "opentelemetry/include/ot_span.hrl") do
+  for {name, spec} <- Record.extract_all(from_lib: "opentelemetry/include/otel_span.hrl") do
     Record.defrecord(name, spec)
   end
 
@@ -24,7 +24,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
   setup do
     Application.delete_env(:opentelemetry_absinthe, :trace_options)
     OpentelemetryAbsinthe.Instrumentation.teardown()
-    :ot_batch_processor.set_exporter(:ot_exporter_pid, self())
+    :otel_batch_processor.set_exporter(:otel_exporter_pid, self())
   end
 
   describe "trace configuration" do
