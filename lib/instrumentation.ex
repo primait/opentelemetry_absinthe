@@ -27,8 +27,6 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   ]
 
   def setup(instrumentation_opts \\ []) do
-    OpenTelemetry.register_application_tracer(:opentelemetry_absinthe)
-
     config =
       @default_config
       |> Keyword.merge(Application.get_env(:opentelemetry_absinthe, :trace_options, []))
@@ -66,6 +64,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       )
       |> put_if(config.trace_request_query, {"graphql.request.query", params["query"]})
 
+    save_parent_ctx()
+
     new_ctx = Tracer.start_span(config.span_name, %{attributes: attributes})
 
     Tracer.set_current_span(new_ctx)
@@ -87,6 +87,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
     Tracer.set_attributes(result_attributes)
     Tracer.end_span()
+
+    restore_parent_ctx()
     :ok
   end
 
@@ -96,4 +98,17 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   # https://elixirforum.com/t/creating-list-adding-elements-on-specific-conditions/6295/4?u=learts
   defp put_if(list, false, _), do: list
   defp put_if(list, true, value), do: [value | list]
+
+  # taken from https://github.com/opentelemetry-beam/opentelemetry_plug/blob/82206fb09fbeb9ffa2f167a5f58ea943c117c003/lib/opentelemetry_plug.ex#L186
+  @ctx_key {__MODULE__, :parent_ctx}
+  defp save_parent_ctx do
+    ctx = Tracer.current_span_ctx()
+    Process.put(@ctx_key, ctx)
+  end
+
+  defp restore_parent_ctx do
+    ctx = Process.get(@ctx_key, :undefined)
+    Process.delete(@ctx_key)
+    Tracer.set_current_span(ctx)
+  end
 end
