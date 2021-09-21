@@ -101,12 +101,12 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
   # taken from https://github.com/opentelemetry-beam/opentelemetry_plug/blob/82206fb09fbeb9ffa2f167a5f58ea943c117c003/lib/opentelemetry_plug.ex#L186
   @ctx_key {__MODULE__, :parent_ctx}
-  defp save_parent_ctx() do
+  defp save_parent_ctx do
     ctx = Tracer.current_span_ctx()
     Process.put(@ctx_key, ctx)
   end
 
-  defp restore_parent_ctx() do
+  defp restore_parent_ctx do
     ctx = Process.get(@ctx_key, :undefined)
     Process.delete(@ctx_key)
     Tracer.set_current_span(ctx)
