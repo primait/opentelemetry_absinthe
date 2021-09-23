@@ -27,6 +27,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   ]
 
   def setup(instrumentation_opts \\ []) do
+    _ = OpenTelemetry.register_application_tracer(:opentelemetry_absinthe)
+    
     config =
       @default_config
       |> Keyword.merge(Application.get_env(:opentelemetry_absinthe, :trace_options, []))
