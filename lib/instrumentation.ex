@@ -76,6 +76,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   end
 
   def handle_operation_stop(_event_name, _measurements, data, config) do
+    errors = data.blueprint.result[:errors]
+
     result_attributes =
       []
       |> put_if(
@@ -84,8 +86,10 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       )
       |> put_if(
         config.trace_response_errors,
-        {"graphql.response.errors", Jason.encode!(data.blueprint.result[:errors])}
+        {"graphql.response.errors", Jason.encode!(errors)}
       )
+
+    set_status(errors)
 
     Tracer.set_attributes(result_attributes)
     Tracer.end_span()
@@ -113,4 +117,9 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     Process.delete(@ctx_key)
     Tracer.set_current_span(ctx)
   end
+
+  # set status as `:error` in case of errors in the graphql response
+  defp set_status(nil), do: :ok
+  defp set_status([]), do: :ok
+  defp set_status(_errors), do: Tracer.set_status(OpenTelemetry.status(:error, ""))
 end
