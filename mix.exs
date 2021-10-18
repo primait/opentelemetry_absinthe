@@ -24,7 +24,7 @@ defmodule OpentelemetryAbsinthe.MixProject do
     [
       {:absinthe, ">= 1.5.0", optional: true},
       {:jason, "~> 1.2"},
-      {:opentelemetry_api, "~> 1.0.0-rc.2"},
+      {:opentelemetry_api, "~> 1.0.0-rc.3"},
       {:telemetry, "~> 0.4 or ~> 1.0.0"}
     ] ++ dev_deps()
   end
@@ -32,7 +32,7 @@ defmodule OpentelemetryAbsinthe.MixProject do
   defp dev_deps do
     [
       {:absinthe_plug, "~> 1.5", only: :test},
-      {:opentelemetry, "~> 1.0.0-rc.2", only: :test},
+      {:opentelemetry, "~> 1.0.0-rc.3", only: :test},
       {:plug_cowboy, "~> 2.2", only: :test},
       {:credo, "~> 1.4", only: [:dev, :test]},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
