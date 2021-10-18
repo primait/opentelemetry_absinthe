@@ -33,6 +33,7 @@ defmodule OpentelemetryAbsinthe.MixProject do
     [
       {:absinthe_plug, "~> 1.5", only: :test},
       {:opentelemetry, "~> 1.0.0-rc.3", only: :test},
+      {:opentelemetry_exporter, "~> 1.0.0-rc.3", only: :test},
       {:plug_cowboy, "~> 2.2", only: :test},
       {:credo, "~> 1.4", only: [:dev, :test]},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
