@@ -36,14 +36,14 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     :telemetry.attach(
       {__MODULE__, :operation_start},
       [:absinthe, :execute, :operation, :start],
-      &handle_operation_start/4,
+      &__MODULE__.handle_operation_start/4,
       config
     )
 
     :telemetry.attach(
       {__MODULE__, :operation_stop},
       [:absinthe, :execute, :operation, :stop],
-      &handle_operation_stop/4,
+      &__MODULE__.handle_operation_stop/4,
       config
     )
   end
