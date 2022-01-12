@@ -38,7 +38,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
                "graphql.request.variables",
                "graphql.response.errors",
                "graphql.response.result"
-             ] = attributes |> Enum.map(&elem(&1, 0)) |> Enum.sort()
+             ] = attributes |> elem(4) |> Map.keys() |> Enum.sort()
     end
 
     test "options provided via application env have precedence over defaults" do
@@ -54,7 +54,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
       assert [
                "graphql.request.variables",
                "graphql.response.errors"
-             ] = attributes |> Enum.map(&elem(&1, 0)) |> Enum.sort()
+             ] = attributes |> elem(4) |> Map.keys() |> Enum.sort()
     end
 
     test "options provided to setup() have precedence over defaults and application env" do
@@ -71,7 +71,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
                "graphql.request.query",
                "graphql.request.variables",
                "graphql.response.errors"
-             ] = attributes |> Enum.map(&elem(&1, 0)) |> Enum.sort()
+             ] = attributes |> elem(4) |> Map.keys() |> Enum.sort()
     end
   end
 end
