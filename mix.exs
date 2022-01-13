@@ -4,7 +4,7 @@ defmodule OpentelemetryAbsinthe.MixProject do
   def project do
     [
       app: :opentelemetry_absinthe,
-      version: "1.0.0-rc.7",
+      version: "1.0.0",
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
