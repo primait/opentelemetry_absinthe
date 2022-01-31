@@ -1,7 +1,7 @@
-use Mix.Config
+import Config
 
 try do
-  import_config "#{Mix.env()}.exs"
+  import_config "#{config_env()}.exs"
 rescue
   _ -> :ok
 end
