@@ -19,6 +19,6 @@ metadata:
     icon: link
     title: official documentation
 
-  - url: https://github.com/primait/bridge.rs
+  - url: https://github.com/primait/opentelemetry_absinthe
     icon: github
     title: github repository
