@@ -69,8 +69,6 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     new_ctx = Tracer.start_span(config.span_name, %{attributes: attributes})
 
     Tracer.set_current_span(new_ctx)
-
-    Logger.metadata(trace_id: span_ctx(new_ctx, :trace_id), span_id: span_ctx(new_ctx, :span_id))
   end
 
   def handle_operation_stop(_event_name, _measurements, data, config) do
