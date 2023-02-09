@@ -35,6 +35,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
 
       assert [
                "graphql.request.query",
+               "graphql.request.selections",
                "graphql.request.variables",
                "graphql.response.errors",
                "graphql.response.result"
@@ -52,6 +53,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
       assert_receive {:span, span(attributes: attributes)}, 5000
 
       assert [
+               "graphql.request.selections",
                "graphql.request.variables",
                "graphql.response.errors"
              ] = attributes |> keys() |> Enum.sort()
@@ -69,9 +71,25 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
 
       assert [
                "graphql.request.query",
+               "graphql.request.selections",
                "graphql.request.variables",
                "graphql.response.errors"
              ] = attributes |> keys() |> Enum.sort()
+    end
+
+    test "request selections correctly extracted" do
+      Application.put_env(:opentelemetry_absinthe, :trace_options,
+        trace_request_query: false,
+        trace_response_result: false
+      )
+
+      OpentelemetryAbsinthe.Instrumentation.setup(trace_request_query: true)
+      {:ok, _} = Absinthe.run(@query, Schema, variables: %{"isbn" => "A1"})
+      assert_receive {:span, span(attributes: {_, _, _, _, attributes})}, 5000
+
+      IO.inspect(attributes)
+
+      assert ["book"] = attributes["graphql.request.selections"] |> Jason.decode!()
     end
   end
 
