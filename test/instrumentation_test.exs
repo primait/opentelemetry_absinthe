@@ -87,8 +87,6 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
       {:ok, _} = Absinthe.run(@query, Schema, variables: %{"isbn" => "A1"})
       assert_receive {:span, span(attributes: {_, _, _, _, attributes})}, 5000
 
-      IO.inspect(attributes)
-
       assert ["book"] = attributes["graphql.request.selections"] |> Jason.decode!()
     end
   end
