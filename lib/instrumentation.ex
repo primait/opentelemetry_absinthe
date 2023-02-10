@@ -74,12 +74,18 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
   def handle_operation_stop(_event_name, _measurements, data, config) do
     fields =
-      data.blueprint.operations
-      |> Enum.reduce([], fn selections, list ->
-        selections.selections
-        |> Enum.reduce(list, fn selection, list -> [selection.name | list] end)
-      end)
-      |> Enum.uniq()
+      case data do
+        %{blueprint: %{operations: [_ | _] = operations}} ->
+          operations
+          |> Enum.reduce([], fn selections, list ->
+            selections.selections
+            |> Enum.reduce(list, fn selection, list -> [selection.name | list] end)
+          end)
+          |> Enum.uniq()
+
+        _ ->
+          []
+      end
 
     errors = data.blueprint.result[:errors]
 

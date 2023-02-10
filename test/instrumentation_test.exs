@@ -21,6 +21,11 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
   }
   """
 
+  @empty_query """
+  query {
+  }
+  """
+
   setup do
     Application.delete_env(:opentelemetry_absinthe, :trace_options)
     OpentelemetryAbsinthe.Instrumentation.teardown()
@@ -88,6 +93,20 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
       assert_receive {:span, span(attributes: {_, _, _, _, attributes})}, 5000
 
       assert ["book"] = attributes["graphql.request.selections"] |> Jason.decode!()
+    end
+
+    test "empty query doesn't crash" do
+      OpentelemetryAbsinthe.Instrumentation.setup()
+      {:ok, _} = Absinthe.run(@empty_query, Schema)
+      assert_receive {:span, span(attributes: attributes)}, 5000
+
+      assert [
+               "graphql.request.query",
+               "graphql.request.selections",
+               "graphql.request.variables",
+               "graphql.response.errors",
+               "graphql.response.result"
+             ] = attributes |> keys() |> Enum.sort()
     end
   end
 
