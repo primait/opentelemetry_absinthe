@@ -73,6 +73,24 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
                "graphql.response.errors"
              ] = attributes |> keys() |> Enum.sort()
     end
+
+    test "additional attributes are included in spans" do
+      additional_attributes = [env: "test"]
+      OpentelemetryAbsinthe.Instrumentation.setup(additional_attributes: additional_attributes)
+
+      {:ok, _} = Absinthe.run(@query, Schema, variables: %{"isbn" => "A1"})
+      assert_receive {:span, span(attributes: attributes)}, 5000
+
+      assert [
+               :env,
+               "graphql.request.query",
+               "graphql.request.variables",
+               "graphql.response.errors",
+               "graphql.response.result"
+             ] = attributes |> keys() |> Enum.sort()
+
+      assert elem(attributes, 4)[:env] == "test"
+    end
   end
 
   defp keys(attributes_record), do: attributes_record |> elem(4) |> Map.keys()
