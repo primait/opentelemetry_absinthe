@@ -4,4 +4,5 @@ defmodule OpentelemetryAbsinthe do
   """
 
   defdelegate setup, to: OpentelemetryAbsinthe.Instrumentation
+  defdelegate setup(opts), to: OpentelemetryAbsinthe.Instrumentation
 end
