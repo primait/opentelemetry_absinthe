@@ -77,10 +77,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       case data do
         %{blueprint: %{operations: [_ | _] = operations}} ->
           operations
-          |> Enum.reduce([], fn selections, list ->
-            selections.selections
-            |> Enum.reduce(list, fn selection, list -> [selection.name | list] end)
-          end)
+          |> Enum.flat_map(& &1.selections)
+          |> Enum.map(& &1.name)
           |> Enum.uniq()
 
         _ ->
