@@ -85,7 +85,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
         config.trace_response_errors,
         {"graphql.response.errors", Jason.encode!(errors)}
       )
-      |> lazy_put_if(
+      |> put_if(
         config.trace_request_selections,
         fn -> {"graphql.request.selections", data |> get_graphql_selections() |> Jason.encode!()} end
       )
@@ -117,10 +117,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   # This snippet is approved by José himself:
   # https://elixirforum.com/t/creating-list-adding-elements-on-specific-conditions/6295/4?u=learts
   defp put_if(list, false, _), do: list
+  defp put_if(list, true, value_fn) when is_function(value_fn), do: [value_fn.() | list]
   defp put_if(list, true, value), do: [value | list]
-
-  defp lazy_put_if(list, false, _), do: list
-  defp lazy_put_if(list, true, value_fn), do: [value_fn.() | list]
 
   # taken from https://github.com/opentelemetry-beam/opentelemetry_plug/blob/82206fb09fbeb9ffa2f167a5f58ea943c117c003/lib/opentelemetry_plug.ex#L186
   @ctx_key {__MODULE__, :parent_ctx}
