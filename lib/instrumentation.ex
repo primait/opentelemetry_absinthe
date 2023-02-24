@@ -23,7 +23,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     trace_request_query: true,
     trace_request_variables: true,
     trace_response_result: true,
-    trace_response_errors: true
+    trace_response_errors: true,
+    trace_request_selections: true
   ]
 
   def setup(instrumentation_opts \\ []) do
@@ -72,6 +73,18 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   end
 
   def handle_operation_stop(_event_name, _measurements, data, config) do
+    fields =
+      case data do
+        %{blueprint: %{operations: [_ | _] = operations}} ->
+          operations
+          |> Enum.flat_map(& &1.selections)
+          |> Enum.map(& &1.name)
+          |> Enum.uniq()
+
+        _ ->
+          []
+      end
+
     errors = data.blueprint.result[:errors]
 
     result_attributes =
@@ -83,6 +96,10 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       |> put_if(
         config.trace_response_errors,
         {"graphql.response.errors", Jason.encode!(errors)}
+      )
+      |> put_if(
+        config.trace_request_selections,
+        {"graphql.request.selections", Jason.encode!(fields)}
       )
 
     set_status(errors)

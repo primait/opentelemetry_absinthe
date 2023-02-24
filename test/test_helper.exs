@@ -34,6 +34,8 @@ defmodule AbsinthePlug.Test.Schema do
         {:ok, get_book_by_isbn(args.isbn)}
       end)
     end
+
+    field :books, list_of(:book)
   end
 end
 

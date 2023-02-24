@@ -21,6 +21,19 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
   }
   """
 
+  @aliased_query """
+  query($isbn: String!) {
+    alias: book(isbn: $isbn) {
+      title
+    }
+  }
+  """
+
+  @empty_query """
+  query {
+  }
+  """
+
   setup do
     Application.delete_env(:opentelemetry_absinthe, :trace_options)
     OpentelemetryAbsinthe.Instrumentation.teardown()
@@ -35,6 +48,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
 
       assert [
                "graphql.request.query",
+               "graphql.request.selections",
                "graphql.request.variables",
                "graphql.response.errors",
                "graphql.response.result"
@@ -52,6 +66,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
       assert_receive {:span, span(attributes: attributes)}, 5000
 
       assert [
+               "graphql.request.selections",
                "graphql.request.variables",
                "graphql.response.errors"
              ] = attributes |> keys() |> Enum.sort()
@@ -69,8 +84,56 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
 
       assert [
                "graphql.request.query",
+               "graphql.request.selections",
                "graphql.request.variables",
                "graphql.response.errors"
+             ] = attributes |> keys() |> Enum.sort()
+    end
+
+    test "request selections correctly extracted" do
+      Application.put_env(:opentelemetry_absinthe, :trace_options,
+        trace_request_query: false,
+        trace_response_result: false
+      )
+
+      OpentelemetryAbsinthe.Instrumentation.setup(trace_request_query: true)
+      {:ok, _} = Absinthe.run(@query, Schema, variables: %{"isbn" => "A1"})
+      assert_receive {:span, span(attributes: {_, _, _, _, attributes})}, 5000
+
+      selections = attributes["graphql.request.selections"] |> Jason.decode!()
+
+      refute Enum.member?(selections, "books")
+
+      # technically, this test also confirms the above, but it's nice to call out the intent.
+      assert ["book"] = selections
+    end
+
+    test "aliased request selections extracted as their un-aliased name" do
+      Application.put_env(:opentelemetry_absinthe, :trace_options,
+        trace_request_query: false,
+        trace_response_result: false
+      )
+
+      OpentelemetryAbsinthe.Instrumentation.setup(trace_request_query: true)
+      {:ok, _} = Absinthe.run(@aliased_query, Schema, variables: %{"isbn" => "A1"})
+      assert_receive {:span, span(attributes: {_, _, _, _, attributes})}, 5000
+
+      selections = attributes["graphql.request.selections"] |> Jason.decode!()
+
+      assert ["book"] = selections
+    end
+
+    test "empty query doesn't crash" do
+      OpentelemetryAbsinthe.Instrumentation.setup()
+      {:ok, _} = Absinthe.run(@empty_query, Schema)
+      assert_receive {:span, span(attributes: attributes)}, 5000
+
+      assert [
+               "graphql.request.query",
+               "graphql.request.selections",
+               "graphql.request.variables",
+               "graphql.response.errors",
+               "graphql.response.result"
              ] = attributes |> keys() |> Enum.sort()
     end
   end
