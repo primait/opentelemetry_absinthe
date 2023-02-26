@@ -11,6 +11,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   alias Absinthe.Blueprint
 
   require OpenTelemetry.Tracer, as: Tracer
+  require OpenTelemetry.SemanticConventions.Trace, as: Conventions
   require Record
 
   @span_ctx_fields Record.extract(:span_ctx,
@@ -20,8 +21,10 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   Record.defrecord(:span_ctx, @span_ctx_fields)
 
   @default_config [
-    span_name: "absinthe graphql resolution",
+    span_name: "GraphQL Operation",
     trace_request_query: true,
+    trace_request_name: true,
+    trace_request_type: true,
     trace_request_variables: false,
     trace_request_selections: true,
     trace_response_result: false,
@@ -59,17 +62,29 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     document = metadata.blueprint.input
     variables = metadata |> Map.get(:options, []) |> Keyword.get(:variables, %{})
 
+    operation_name = metadata.options[:operation_name]
+    operation_type = get_operation_type(document)
+
     attributes =
       []
       |> put_if(
         config.trace_request_variables,
         {"graphql.request.variables", Jason.encode!(variables)}
       )
-      |> put_if(config.trace_request_query, {"graphql.request.query", document})
+      |> put_if(config.trace_request_query, {Atom.to_string(Conventions.graphql_document()), document})
+      |> put_if(config.trace_request_name, {Atom.to_string(Conventions.graphql_operation_name()), operation_name})
+      |> put_if(config.trace_request_type, {Atom.to_string(Conventions.graphql_operation_type()), operation_type})
+
+    span_name =
+      cond do
+        not is_nil(operation_type) and not is_nil(operation_name) -> "#{operation_type} #{operation_name}"
+        not is_nil(operation_type) -> operation_type
+        true -> config.span_name
+      end
 
     save_parent_ctx()
 
-    new_ctx = Tracer.start_span(config.span_name, %{attributes: attributes})
+    new_ctx = Tracer.start_span(span_name, %{attributes: attributes})
 
     Tracer.set_current_span(new_ctx)
   end
@@ -112,6 +127,17 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
   def default_config do
     @default_config
+  end
+
+  defp get_operation_type(nil), do: nil
+
+  defp get_operation_type(document) do
+    cond do
+      String.starts_with?(document, "query") -> "query"
+      String.starts_with?(document, "mutation") -> "mutation"
+      String.starts_with?(document, "subscription") -> "subscription"
+      true -> nil
+    end
   end
 
   # Surprisingly, that doesn't seem to by anything in the stdlib to conditionally

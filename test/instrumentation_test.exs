@@ -18,7 +18,9 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
       attrs = Query.query_for_attrs(Queries.empty_query())
 
       assert [
-               "graphql.request.query",
+               "graphql.document",
+               "graphql.operation.name",
+               "graphql.operation.type",
                "graphql.request.selections",
                "graphql.request.variables",
                "graphql.response.errors",
@@ -32,7 +34,9 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
     attrs = Query.query_for_attrs(Queries.batch_queries(), variables: %{"isbn" => "A1"}, operation_name: "OperationOne")
 
     assert [
-             "graphql.request.query",
+             "graphql.document",
+             "graphql.operation.name",
+             "graphql.operation.type",
              "graphql.request.selections",
              "graphql.request.variables",
              "graphql.response.errors",
