@@ -1,6 +1,8 @@
 defmodule OpentelemetryAbsinthe do
   alias OpentelemetryAbsinthe.Instrumentation
 
+  # Allow alias before moduledoc
+  # credo:disable-for-next-line
   @moduledoc """
   # OpentelemetryAbsinthe
   An opentelemetry instrumentation library for Absinthe
