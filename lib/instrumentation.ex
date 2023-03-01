@@ -23,9 +23,9 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     span_name: "absinthe graphql resolution",
     trace_request_query: true,
     trace_request_variables: false,
+    trace_request_selections: true,
     trace_response_result: false,
-    trace_response_errors: false,
-    trace_request_selections: true
+    trace_response_errors: false
   ]
 
   def setup(instrumentation_opts \\ []) do
@@ -108,6 +108,10 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     |> Map.get(:selections, [])
     |> Enum.map(& &1.name)
     |> Enum.uniq()
+  end
+
+  def default_config do
+    @default_config
   end
 
   # Surprisingly, that doesn't seem to by anything in the stdlib to conditionally

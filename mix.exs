@@ -13,6 +13,7 @@ defmodule OpentelemetryAbsinthe.MixProject do
         # Since absinthe is an optional dependency we need to tell dialyxir to include it
         plt_add_apps: [:absinthe]
       ],
+      docs: docs(),
       package: package(),
       aliases: aliases(),
       description: description()
@@ -26,6 +27,13 @@ defmodule OpentelemetryAbsinthe.MixProject do
   def application do
     [
       extra_applications: [:logger]
+    ]
+  end
+
+  defp docs do
+    [
+      main: "OpentelemetryAbsinthe",
+      formatters: ["html"]
     ]
   end
 
