@@ -70,7 +70,7 @@ defmodule OpentelemetryAbsintheTest.Extraction do
     end
 
     test "response result" do
-      OpentelemetryAbsinthe.Instrumentation.setup(trace_response_results: true)
+      OpentelemetryAbsinthe.Instrumentation.setup(trace_response_result: true)
 
       result =
         Queries.query()

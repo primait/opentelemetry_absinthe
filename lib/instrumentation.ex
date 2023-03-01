@@ -22,9 +22,9 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   @default_config [
     span_name: "absinthe graphql resolution",
     trace_request_query: true,
-    trace_request_variables: true,
-    trace_response_result: true,
-    trace_response_errors: true,
+    trace_request_variables: false,
+    trace_response_result: false,
+    trace_response_errors: false,
     trace_request_selections: true
   ]
 
