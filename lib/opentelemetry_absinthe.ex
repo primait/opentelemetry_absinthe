@@ -1,15 +1,16 @@
 defmodule OpentelemetryAbsinthe do
   alias OpentelemetryAbsinthe.Instrumentation
+
   @moduledoc """
   # OpentelemetryAbsinthe
   An opentelemetry instrumentation library for Absinthe
 
   ## Usage
-  
+
   To start collecting traces just put `OpentelemetryAbsinthe.setup()` in your application start function.
 
   ## Configuration
-  
+
   OpentelemetryAbsinthe can be configured with the application environment
   ```
   config :opentelemetry_absinthe,
