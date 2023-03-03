@@ -1,6 +1,8 @@
 defmodule OpentelemetryAbsintheTest.Instrumentation do
   use ExUnit.Case
-  alias AbsinthePlug.Test.Schema
+  alias OpentelemetryAbsintheTest.GraphQL.Schema
+  alias OpentelemetryAbsintheTest.GraphQL.Queries
+
   require Record
 
   doctest OpentelemetryAbsinthe.Instrumentation
@@ -8,31 +10,6 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
   for {name, spec} <- Record.extract_all(from_lib: "opentelemetry/include/otel_span.hrl") do
     Record.defrecord(name, spec)
   end
-
-  @query """
-  query($isbn: String!) {
-    book(isbn: $isbn) {
-      title
-      author {
-        name
-        age
-      }
-    }
-  }
-  """
-
-  @aliased_query """
-  query($isbn: String!) {
-    alias: book(isbn: $isbn) {
-      title
-    }
-  }
-  """
-
-  @empty_query """
-  query {
-  }
-  """
 
   setup do
     Application.delete_env(:opentelemetry_absinthe, :trace_options)
@@ -43,7 +20,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
   describe "trace configuration" do
     test "by default all graphql stuff is recorded in attributes" do
       OpentelemetryAbsinthe.Instrumentation.setup()
-      {:ok, _} = Absinthe.run(@query, Schema, variables: %{"isbn" => "A1"})
+      {:ok, _} = Absinthe.run(Queries.query(), Schema, variables: %{"isbn" => "A1"})
       assert_receive {:span, span(attributes: attributes)}, 5000
 
       assert [
@@ -62,7 +39,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
       )
 
       OpentelemetryAbsinthe.Instrumentation.setup()
-      {:ok, _} = Absinthe.run(@query, Schema, variables: %{"isbn" => "A1"})
+      {:ok, _} = Absinthe.run(Queries.query(), Schema, variables: %{"isbn" => "A1"})
       assert_receive {:span, span(attributes: attributes)}, 5000
 
       assert [
@@ -79,7 +56,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
       )
 
       OpentelemetryAbsinthe.Instrumentation.setup(trace_request_query: true)
-      {:ok, _} = Absinthe.run(@query, Schema, variables: %{"isbn" => "A1"})
+      {:ok, _} = Absinthe.run(Queries.query(), Schema, variables: %{"isbn" => "A1"})
       assert_receive {:span, span(attributes: attributes)}, 5000
 
       assert [
@@ -97,7 +74,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
       )
 
       OpentelemetryAbsinthe.Instrumentation.setup(trace_request_query: true)
-      {:ok, _} = Absinthe.run(@query, Schema, variables: %{"isbn" => "A1"})
+      {:ok, _} = Absinthe.run(Queries.query(), Schema, variables: %{"isbn" => "A1"})
       assert_receive {:span, span(attributes: {_, _, _, _, attributes})}, 5000
 
       selections = Jason.decode!(attributes["graphql.request.selections"])
@@ -115,7 +92,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
       )
 
       OpentelemetryAbsinthe.Instrumentation.setup(trace_request_query: true)
-      {:ok, _} = Absinthe.run(@aliased_query, Schema, variables: %{"isbn" => "A1"})
+      {:ok, _} = Absinthe.run(Queries.aliased_query, Schema, variables: %{"isbn" => "A1"})
       assert_receive {:span, span(attributes: {_, _, _, _, attributes})}, 5000
 
       selections = Jason.decode!(attributes["graphql.request.selections"])
@@ -125,7 +102,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
 
     test "empty query doesn't crash" do
       OpentelemetryAbsinthe.Instrumentation.setup()
-      {:ok, _} = Absinthe.run(@empty_query, Schema)
+      {:ok, _} = Absinthe.run(Queries.empty_query, Schema)
       assert_receive {:span, span(attributes: attributes)}, 5000
 
       assert [

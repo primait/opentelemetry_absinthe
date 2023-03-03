@@ -6,6 +6,7 @@ defmodule OpentelemetryAbsinthe.MixProject do
       app: :opentelemetry_absinthe,
       version: "1.1.0",
       elixir: "~> 1.11",
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
@@ -13,6 +14,11 @@ defmodule OpentelemetryAbsinthe.MixProject do
       description: description()
     ]
   end
+
+  # Specifies which paths to compile per environment.
+  defp elixirc_paths(:dev), do: ["lib", "test/support"]
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   def application do
     [
@@ -58,5 +64,6 @@ defmodule OpentelemetryAbsinthe.MixProject do
 
   def description do
     "OpentelemetryAbsinthe is a OpenTelemetry instrumentation library for Absinthe."
+
   end
 end
