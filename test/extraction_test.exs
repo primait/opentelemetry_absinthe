@@ -55,5 +55,17 @@ defmodule OpentelemetryAbsintheTest.Extraction do
 
       assert %{"data" => %{"book" => %{"author" => %{"age" => 18, "name" => "Ale Ali"}, "title" => "Fire"}}} = selections
     end
+
+    test "response errors" do
+      OpentelemetryAbsinthe.Instrumentation.setup(trace_response_errors: true)
+
+      selections =
+        Queries.query()
+        |> Query.query_for_attrs()
+        |> Map.fetch!("graphql.response.errors")
+        |> Jason.decode!()
+
+      assert [%{"locations" => [%{"column" => 8, "line" => 2}], "message" => "In argument \"isbn\": Expected type \"String!\", found null."}, %{"locations" => [%{"column" => 7, "line" => 1}], "message" => "Variable \"isbn\": Expected non-null, found null."}] = selections
+    end
   end
 end
