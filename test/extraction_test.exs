@@ -6,7 +6,7 @@ defmodule OpentelemetryAbsintheTest.Extraction do
 
   describe "extracts" do
     test "request selections" do
-      OpentelemetryAbsinthe.Instrumentation.setup(trace_request_query: true)
+      OpentelemetryAbsinthe.Instrumentation.setup(trace_request_selections: true)
 
       selections =
         Queries.query()
@@ -18,7 +18,7 @@ defmodule OpentelemetryAbsintheTest.Extraction do
     end
 
     test "aliased request selections as their un-aliased name" do
-      OpentelemetryAbsinthe.Instrumentation.setup(trace_request_query: true)
+      OpentelemetryAbsinthe.Instrumentation.setup(trace_request_selections: true)
 
       selections =
         Queries.aliased_query()
