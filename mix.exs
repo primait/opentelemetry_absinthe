@@ -9,6 +9,10 @@ defmodule OpentelemetryAbsinthe.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      dialyzer: [
+        # Since absinthe is an optional dependency we need to tell dialyxir to include it
+        plt_add_apps: [:absinthe]
+      ],
       package: package(),
       aliases: aliases(),
       description: description()
