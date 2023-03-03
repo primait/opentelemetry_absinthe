@@ -1,4 +1,4 @@
-defmodule OpentelemetryAbsintheTest.GraphQL.Queries do
+defmodule OpentelemetryAbsintheTest.Support.GraphQL.Queries do
   def query do
     """
     query($isbn: String!) {

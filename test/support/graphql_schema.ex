@@ -1,4 +1,4 @@
-defmodule OpentelemetryAbsintheTest.GraphQL.Schema do
+defmodule OpentelemetryAbsintheTest.Support.GraphQL.Schema do
   use Absinthe.Schema
 
   @books [
@@ -35,4 +35,5 @@ defmodule OpentelemetryAbsintheTest.GraphQL.Schema do
 
     field :books, list_of(:book)
   end
+
 end
