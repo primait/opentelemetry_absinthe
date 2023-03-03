@@ -1,5 +1,5 @@
 defmodule OpentelemetryAbsintheTest.Instrumentation do
-  use OpentelemetryAbsintheTest.Case 
+  use OpentelemetryAbsintheTest.Case
 
   alias OpentelemetryAbsintheTest.Support.Query
   alias OpentelemetryAbsintheTest.Support.GraphQL.Queries

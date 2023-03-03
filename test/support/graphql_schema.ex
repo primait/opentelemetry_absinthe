@@ -35,5 +35,4 @@ defmodule OpentelemetryAbsintheTest.Support.GraphQL.Schema do
 
     field :books, list_of(:book)
   end
-
 end

@@ -4,7 +4,6 @@ defmodule OpentelemetryAbsintheTest.Support.Query do
 
   alias OpentelemetryAbsintheTest.Support.GraphQL.Schema
 
-
   @fields Record.extract(:span, from: "deps/opentelemetry/include/otel_span.hrl")
   Record.defrecordp(:span, @fields)
 

@@ -1,5 +1,5 @@
 defmodule OpentelemetryAbsintheTest.Extraction do
-  use OpentelemetryAbsintheTest.Case 
+  use OpentelemetryAbsintheTest.Case
 
   alias OpentelemetryAbsintheTest.Support.Query
   alias OpentelemetryAbsintheTest.Support.GraphQL.Queries
@@ -7,6 +7,7 @@ defmodule OpentelemetryAbsintheTest.Extraction do
   describe "extracts" do
     test "request selections" do
       OpentelemetryAbsinthe.Instrumentation.setup(trace_request_query: true)
+
       selections =
         Queries.query()
         |> Query.query_for_attrs(variables: %{"isbn" => "A1"})
