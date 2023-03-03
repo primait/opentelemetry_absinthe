@@ -37,4 +37,13 @@ defmodule OpentelemetryAbsintheTest.Support.GraphQL.Schema do
 
     field :books, list_of(:book)
   end
+
+  mutation do
+    # stub doesn't actually mutate
+    field :create_book, type: :book do
+      arg :title, non_null(:string)
+
+      resolve fn _, _, _ -> {:ok, get_book_by_isbn("A1")} end
+    end
+  end
 end

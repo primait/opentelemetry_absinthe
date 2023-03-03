@@ -30,4 +30,14 @@ defmodule OpentelemetryAbsintheTest.Support.GraphQL.Queries do
     }
     """
   end
+
+  def mutation do
+    """
+    mutation($title: String!) {
+      create_book(title: $title) {
+        title
+      }
+    }
+    """
+  end
 end

@@ -35,6 +35,18 @@ defmodule OpentelemetryAbsintheTest.Extraction do
       assert ["book"] = selections
     end
 
+    test "request selections on a mutation" do
+      OpentelemetryAbsinthe.Instrumentation.setup(trace_request_selections: true)
+
+      selections =
+        Queries.mutation()
+        |> Query.query_for_attrs(variables: %{"isbn" => "A1"})
+        |> Map.fetch!("graphql.request.selections")
+        |> Jason.decode!()
+
+      assert ["create_book"] = selections
+    end
+
     test "aliased request selections as their un-aliased name" do
       OpentelemetryAbsinthe.Instrumentation.setup(trace_request_selections: true)
 
