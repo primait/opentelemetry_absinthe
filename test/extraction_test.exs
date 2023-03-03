@@ -53,7 +53,7 @@ defmodule OpentelemetryAbsintheTest.Extraction do
         |> Map.fetch!("graphql.response.result")
         |> Jason.decode!()
 
-      assert %{"data" => %{"book" => %{"author" => %{"age" => 18, "name" => "Ale Ali"}, "title" => "Fire"}}} = result 
+      assert %{"data" => %{"book" => %{"author" => %{"age" => 18, "name" => "Ale Ali"}, "title" => "Fire"}}} = result
     end
 
     test "response errors" do
@@ -65,7 +65,16 @@ defmodule OpentelemetryAbsintheTest.Extraction do
         |> Map.fetch!("graphql.response.errors")
         |> Jason.decode!()
 
-      assert [%{"locations" => [%{"column" => 8, "line" => 2}], "message" => "In argument \"isbn\": Expected type \"String!\", found null."}, %{"locations" => [%{"column" => 7, "line" => 1}], "message" => "Variable \"isbn\": Expected non-null, found null."}] = errors
+      assert [
+               %{
+                 "locations" => [%{"column" => 8, "line" => 2}],
+                 "message" => "In argument \"isbn\": Expected type \"String!\", found null."
+               },
+               %{
+                 "locations" => [%{"column" => 7, "line" => 1}],
+                 "message" => "Variable \"isbn\": Expected non-null, found null."
+               }
+             ] = errors
     end
   end
 end
