@@ -33,7 +33,7 @@ defmodule OpentelemetryAbsinthe do
     * `trace_request_query`(default: #{Instrumentation.default_config()[:trace_request_query]}): attaches the graphql query as an attribute
 
       **Important Note**: This is usually safe, since graphql queries are expected to be static. All dynamic data should be passed via graphql variables. 
-      However some libraries(for example [dillonkearns/elm-graphql](https://github.com/dillonkearns/elm-graphql/issues/27) stores the variables inline as a part of the query.
+      However some libraries(for example [dillonkearns/elm-graphql](https://github.com/dillonkearns/elm-graphql/issues/27) store the variables inline as a part of the query.
       If you expect clients to send dynamic data as a part of the graphql query you should disable this.
 
     * `trace_request_variables`(default: #{Instrumentation.default_config()[:trace_request_variables]}): attaches the graphql variables as an attribute
