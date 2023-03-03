@@ -17,7 +17,10 @@ defmodule OpentelemetryAbsintheTest.Extraction do
       variables = %{"isbn" => "A1", "author" => "Mara Bos"}
 
       assert ^variables =
-               Queries.query() |> Query.query_for_attrs() |> Map.fetch!("graphql.request.variables") |> Jason.decode!()
+               Queries.query()
+               |> Query.query_for_attrs(variables: variables)
+               |> Map.fetch!("graphql.request.variables")
+               |> Jason.decode!()
     end
 
     test "request selections" do

@@ -55,15 +55,16 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   end
 
   def handle_operation_start(_event_name, _measurements, metadata, config) do
-    params = metadata |> Map.get(:options, []) |> Keyword.get(:params, %{})
+    document = metadata.blueprint.input
+    variables = metadata |> Map.get(:options, []) |> Keyword.get(:variables, %{})
 
     attributes =
       []
       |> put_if(
         config.trace_request_variables,
-        {"graphql.request.variables", Jason.encode!(params["variables"])}
+        {"graphql.request.variables", Jason.encode!(variables)}
       )
-      |> put_if(config.trace_request_query, {"graphql.request.query", params["query"]})
+      |> put_if(config.trace_request_query, {"graphql.request.query", document})
 
     save_parent_ctx()
 
