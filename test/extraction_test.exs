@@ -5,6 +5,13 @@ defmodule OpentelemetryAbsintheTest.Extraction do
   alias OpentelemetryAbsintheTest.Support.Query
 
   describe "extracts" do
+    test "request query" do
+      OpentelemetryAbsinthe.Instrumentation.setup(trace_request_query: true)
+      query = Queries.query()
+
+      assert ^query = query |> Query.query_for_attrs() |> Map.fetch!("graphql.request.query")
+    end
+
     test "request selections" do
       OpentelemetryAbsinthe.Instrumentation.setup(trace_request_selections: true)
 
