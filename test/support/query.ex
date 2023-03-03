@@ -1,8 +1,9 @@
 defmodule OpentelemetryAbsintheTest.Support.Query do
-  require Record
-  import ExUnit.Assertions
+  @moduledoc false
 
+  import ExUnit.Assertions
   alias OpentelemetryAbsintheTest.Support.GraphQL.Schema
+  require Record
 
   @fields Record.extract(:span, from: "deps/opentelemetry/include/otel_span.hrl")
   Record.defrecordp(:span, @fields)

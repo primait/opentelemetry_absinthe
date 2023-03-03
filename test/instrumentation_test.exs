@@ -1,8 +1,8 @@
 defmodule OpentelemetryAbsintheTest.Instrumentation do
   use OpentelemetryAbsintheTest.Case
 
-  alias OpentelemetryAbsintheTest.Support.Query
   alias OpentelemetryAbsintheTest.Support.GraphQL.Queries
+  alias OpentelemetryAbsintheTest.Support.Query
 
   describe "query" do
     test "doesn't crash when empty" do

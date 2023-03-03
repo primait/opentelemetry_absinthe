@@ -1,4 +1,6 @@
 defmodule OpentelemetryAbsintheTest.Support.GraphQL.Schema do
+  @moduledoc false
+
   use Absinthe.Schema
 
   @books [

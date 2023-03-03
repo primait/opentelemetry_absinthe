@@ -1,4 +1,6 @@
 defmodule OpentelemetryAbsintheTest.Case do
+  @moduledoc false
+
   use ExUnit.CaseTemplate
 
   setup do
