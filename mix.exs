@@ -31,10 +31,8 @@ defmodule OpentelemetryAbsinthe.MixProject do
 
   defp dev_deps do
     [
-      {:absinthe_plug, "~> 1.5", only: :test},
       {:opentelemetry, "~> 1.1", only: :test},
       {:opentelemetry_exporter, "~> 1.1", only: :test},
-      {:plug_cowboy, "~> 2.2", only: :test},
       {:credo, "~> 1.4", only: [:dev, :test]},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}

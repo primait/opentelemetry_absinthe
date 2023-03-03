@@ -39,19 +39,4 @@ defmodule AbsinthePlug.Test.Schema do
   end
 end
 
-defmodule AbsinthePlug.Test.Server do
-  use Plug.Builder
-
-  plug(Plug.Parsers,
-    parsers: [:urlencoded, :multipart, :json, Absinthe.Plug.Parser],
-    pass: ["*/*"],
-    json_decoder: Jason
-  )
-
-  plug(Absinthe.Plug, schema: AbsinthePlug.Test.Schema)
-end
-
-child_spec = [{Plug.Cowboy, scheme: :http, plug: AbsinthePlug.Test.Server, options: [port: 8000]}]
-{:ok, _pid} = Supervisor.start_link(child_spec, strategy: :one_for_one)
-
 ExUnit.start()
