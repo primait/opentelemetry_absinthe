@@ -47,25 +47,25 @@ defmodule OpentelemetryAbsintheTest.Extraction do
     test "response result" do
       OpentelemetryAbsinthe.Instrumentation.setup(trace_response_results: true)
 
-      selections =
+      result =
         Queries.query()
         |> Query.query_for_attrs(variables: %{"isbn" => "A1"})
         |> Map.fetch!("graphql.response.result")
         |> Jason.decode!()
 
-      assert %{"data" => %{"book" => %{"author" => %{"age" => 18, "name" => "Ale Ali"}, "title" => "Fire"}}} = selections
+      assert %{"data" => %{"book" => %{"author" => %{"age" => 18, "name" => "Ale Ali"}, "title" => "Fire"}}} = result 
     end
 
     test "response errors" do
       OpentelemetryAbsinthe.Instrumentation.setup(trace_response_errors: true)
 
-      selections =
+      errors =
         Queries.query()
         |> Query.query_for_attrs()
         |> Map.fetch!("graphql.response.errors")
         |> Jason.decode!()
 
-      assert [%{"locations" => [%{"column" => 8, "line" => 2}], "message" => "In argument \"isbn\": Expected type \"String!\", found null."}, %{"locations" => [%{"column" => 7, "line" => 1}], "message" => "Variable \"isbn\": Expected non-null, found null."}] = selections
+      assert [%{"locations" => [%{"column" => 8, "line" => 2}], "message" => "In argument \"isbn\": Expected type \"String!\", found null."}, %{"locations" => [%{"column" => 7, "line" => 1}], "message" => "Variable \"isbn\": Expected non-null, found null."}] = errors
     end
   end
 end
