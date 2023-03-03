@@ -43,5 +43,17 @@ defmodule OpentelemetryAbsintheTest.Extraction do
 
       assert ["book"] = selections
     end
+
+    test "response result" do
+      OpentelemetryAbsinthe.Instrumentation.setup(trace_response_results: true)
+
+      selections =
+        Queries.query()
+        |> Query.query_for_attrs(variables: %{"isbn" => "A1"})
+        |> Map.fetch!("graphql.response.result")
+        |> Jason.decode!()
+
+      assert %{"data" => %{"book" => %{"author" => %{"age" => 18, "name" => "Ale Ali"}, "title" => "Fire"}}} = selections
+    end
   end
 end
