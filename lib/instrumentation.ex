@@ -73,18 +73,6 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   end
 
   def handle_operation_stop(_event_name, _measurements, data, config) do
-    fields =
-      case data do
-        %{blueprint: %{operations: [_ | _] = operations}} ->
-          operations
-          |> Enum.flat_map(& &1.selections)
-          |> Enum.map(& &1.name)
-          |> Enum.uniq()
-
-        _ ->
-          []
-      end
-
     errors = data.blueprint.result[:errors]
 
     result_attributes =
@@ -99,7 +87,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       )
       |> put_if(
         config.trace_request_selections,
-        {"graphql.request.selections", Jason.encode!(fields)}
+        fn -> {"graphql.request.selections", data |> get_graphql_selections() |> Jason.encode!()} end
       )
 
     set_status(errors)
@@ -111,11 +99,25 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     :ok
   end
 
+  defp get_graphql_selections(data) do
+    case data do
+      %{blueprint: %{operations: [_ | _] = operations}} ->
+        operations
+        |> Enum.flat_map(& &1.selections)
+        |> Enum.map(& &1.name)
+        |> Enum.uniq()
+
+      _ ->
+        []
+    end
+  end
+
   # Surprisingly, that doesn't seem to by anything in the stdlib to conditionally
   # put stuff in a list / keyword list.
   # This snippet is approved by José himself:
   # https://elixirforum.com/t/creating-list-adding-elements-on-specific-conditions/6295/4?u=learts
   defp put_if(list, false, _), do: list
+  defp put_if(list, true, value_fn) when is_function(value_fn), do: [value_fn.() | list]
   defp put_if(list, true, value), do: [value | list]
 
   # taken from https://github.com/opentelemetry-beam/opentelemetry_plug/blob/82206fb09fbeb9ffa2f167a5f58ea943c117c003/lib/opentelemetry_plug.ex#L186

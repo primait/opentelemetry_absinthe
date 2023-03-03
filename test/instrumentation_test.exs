@@ -100,7 +100,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
       {:ok, _} = Absinthe.run(@query, Schema, variables: %{"isbn" => "A1"})
       assert_receive {:span, span(attributes: {_, _, _, _, attributes})}, 5000
 
-      selections = attributes["graphql.request.selections"] |> Jason.decode!()
+      selections = Jason.decode!(attributes["graphql.request.selections"])
 
       refute Enum.member?(selections, "books")
 
@@ -118,7 +118,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
       {:ok, _} = Absinthe.run(@aliased_query, Schema, variables: %{"isbn" => "A1"})
       assert_receive {:span, span(attributes: {_, _, _, _, attributes})}, 5000
 
-      selections = attributes["graphql.request.selections"] |> Jason.decode!()
+      selections = Jason.decode!(attributes["graphql.request.selections"])
 
       assert ["book"] = selections
     end
