@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - new `trace_request_selections` option to enable tracing root level GraphQL selections, which will be stored under `graphql.request.selections`
+- Attribute `graphql.operation.name` was added
+- Attribute `graphql.operation.type` was added
+
+### Changed
+
+- BREAKING: `graphql.request.query` was renamed to `graphql.document`.
+- Span name was changed to `graphql.operation.type` + `graphql.operation.name` if those fields are present, else "GraphQL Operation"
 
 ### Changed
 
