@@ -62,38 +62,41 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     document = metadata.blueprint.input
     variables = metadata |> Map.get(:options, []) |> Keyword.get(:variables, %{})
 
-    operation_name = metadata.options[:operation_name]
-    operation_type = get_operation_type(document)
-
     attributes =
       []
       |> put_if(
         config.trace_request_variables,
         {"graphql.request.variables", Jason.encode!(variables)}
       )
-      |> put_if(config.trace_request_query, {Atom.to_string(Conventions.graphql_document()), document})
-      |> put_if(config.trace_request_name, {Atom.to_string(Conventions.graphql_operation_name()), operation_name})
-      |> put_if(config.trace_request_type, {Atom.to_string(Conventions.graphql_operation_type()), operation_type})
-
-    span_name =
-      cond do
-        not is_nil(operation_type) and not is_nil(operation_name) -> "#{operation_type} #{operation_name}"
-        not is_nil(operation_type) -> operation_type
-        true -> config.span_name
-      end
+      |> put_if(config.trace_request_query, {Conventions.graphql_document(), document})
 
     save_parent_ctx()
 
-    new_ctx = Tracer.start_span(span_name, %{attributes: attributes})
+    new_ctx = Tracer.start_span(config.span_name, %{attributes: attributes})
 
     Tracer.set_current_span(new_ctx)
   end
 
   def handle_operation_stop(_event_name, _measurements, data, config) do
+    operation_type = get_operation_type(data)
+    operation_name = get_operation_name(data)
+
+    span_name = span_name(operation_type, operation_name, config.span_name)
+
+    Tracer.update_name(span_name)
+
     errors = data.blueprint.result[:errors]
 
     result_attributes =
       []
+      |> put_if(
+        config.trace_request_type,
+        {Conventions.graphql_operation_type(), operation_type}
+      )
+      |> put_if(
+        config.trace_request_name,
+        {Conventions.graphql_operation_name(), operation_name}
+      )
       |> put_if(
         config.trace_response_result,
         {"graphql.response.result", Jason.encode!(data.blueprint.result)}
@@ -129,16 +132,17 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     @default_config
   end
 
-  defp get_operation_type(nil), do: nil
-
-  defp get_operation_type(document) do
-    cond do
-      String.starts_with?(document, "query") -> "query"
-      String.starts_with?(document, "mutation") -> "mutation"
-      String.starts_with?(document, "subscription") -> "subscription"
-      true -> nil
-    end
+  defp get_operation_type(%{blueprint: %Blueprint{} = blueprint}) do
+    blueprint |> Absinthe.Blueprint.current_operation() |> Kernel.||(%{}) |> Map.get(:type)
   end
+
+  defp get_operation_name(%{blueprint: %Blueprint{} = blueprint}) do
+    blueprint |> Absinthe.Blueprint.current_operation() |> Kernel.||(%{}) |> Map.get(:name)
+  end
+
+  defp span_name(nil, _, default), do: default
+  defp span_name(op_type, nil, _), do: op_type
+  defp span_name(op_type, op_name, _), do: "#{op_type} #{op_name}"
 
   # Surprisingly, that doesn't seem to by anything in the stdlib to conditionally
   # put stuff in a list / keyword list.
