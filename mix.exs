@@ -67,6 +67,5 @@ defmodule OpentelemetryAbsinthe.MixProject do
 
   def description do
     "OpentelemetryAbsinthe is a OpenTelemetry instrumentation library for Absinthe."
-
   end
 end
