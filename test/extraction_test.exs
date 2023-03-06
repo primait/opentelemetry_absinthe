@@ -59,6 +59,22 @@ defmodule OpentelemetryAbsintheTest.Extraction do
       assert ["book"] = selections
     end
 
+    test "request selections on multiple queries" do
+      OpentelemetryAbsinthe.Instrumentation.setup(trace_request_selections: true)
+
+      assert ["book"] =
+               Queries.batch_queries()
+               |> Query.query_for_attrs(variables: %{"isbn" => "A1"}, operation_name: "OperationOne")
+               |> Map.fetch!("graphql.request.selections")
+               |> Jason.decode!()
+
+      assert ["books"] =
+               Queries.batch_queries()
+               |> Query.query_for_attrs(variables: %{"isbn" => "A1"}, operation_name: "OperationTwo")
+               |> Map.fetch!("graphql.request.selections")
+               |> Jason.decode!()
+    end
+
     test "response result" do
       OpentelemetryAbsinthe.Instrumentation.setup(trace_response_results: true)
 

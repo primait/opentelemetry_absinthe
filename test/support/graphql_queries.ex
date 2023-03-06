@@ -40,4 +40,19 @@ defmodule OpentelemetryAbsintheTest.Support.GraphQL.Queries do
     }
     """
   end
+
+  def batch_queries do
+    """
+    query OperationOne($isbn: String!) {
+      book(isbn: $isbn) {
+        title
+      }
+    }
+    query OperationTwo {
+      books {
+        pages
+      }
+    }
+    """
+  end
 end
