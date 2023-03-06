@@ -31,6 +31,10 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     trace_response_errors: false
   ]
 
+  @graphql_document_attr Atom.to_string(Conventions.graphql_document())
+  @graphql_operation_name_attr Atom.to_string(Conventions.graphql_operation_name())
+  @graphql_operation_type_attr Atom.to_string(Conventions.graphql_operation_type())
+
   def setup(instrumentation_opts \\ []) do
     config =
       @default_config
@@ -68,7 +72,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
         config.trace_request_variables,
         {"graphql.request.variables", Jason.encode!(variables)}
       )
-      |> put_if(config.trace_request_query, {Conventions.graphql_document(), document})
+      |> put_if(config.trace_request_query, {@graphql_document_attr, document})
 
     save_parent_ctx()
 
@@ -91,11 +95,11 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       []
       |> put_if(
         config.trace_request_type,
-        {Conventions.graphql_operation_type(), operation_type}
+        {@graphql_operation_type_attr, operation_type}
       )
       |> put_if(
         config.trace_request_name,
-        {Conventions.graphql_operation_name(), operation_name}
+        {@graphql_operation_name_attr, operation_name}
       )
       |> put_if(
         config.trace_response_result,
