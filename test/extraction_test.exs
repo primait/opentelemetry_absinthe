@@ -26,37 +26,31 @@ defmodule OpentelemetryAbsintheTest.Extraction do
     test "request selections" do
       OpentelemetryAbsinthe.Instrumentation.setup(trace_request_selections: true)
 
-      selections =
-        Queries.query()
-        |> Query.query_for_attrs(variables: %{"isbn" => "A1"})
-        |> Map.fetch!("graphql.request.selections")
-        |> Jason.decode!()
-
-      assert ["book"] = selections
+      assert ["book"] =
+               Queries.query()
+               |> Query.query_for_attrs(variables: %{"isbn" => "A1"})
+               |> Map.fetch!("graphql.request.selections")
+               |> Jason.decode!()
     end
 
     test "request selections on a mutation" do
       OpentelemetryAbsinthe.Instrumentation.setup(trace_request_selections: true)
 
-      selections =
-        Queries.mutation()
-        |> Query.query_for_attrs(variables: %{"isbn" => "A1"})
-        |> Map.fetch!("graphql.request.selections")
-        |> Jason.decode!()
-
-      assert ["create_book"] = selections
+      assert ["create_book"] =
+               Queries.mutation()
+               |> Query.query_for_attrs(variables: %{"isbn" => "A1"})
+               |> Map.fetch!("graphql.request.selections")
+               |> Jason.decode!()
     end
 
     test "aliased request selections as their un-aliased name" do
       OpentelemetryAbsinthe.Instrumentation.setup(trace_request_selections: true)
 
-      selections =
-        Queries.aliased_query()
-        |> Query.query_for_attrs(variables: %{"isbn" => "A1"})
-        |> Map.fetch!("graphql.request.selections")
-        |> Jason.decode!()
-
-      assert ["book"] = selections
+      assert ["book"] =
+               Queries.aliased_query()
+               |> Query.query_for_attrs(variables: %{"isbn" => "A1"})
+               |> Map.fetch!("graphql.request.selections")
+               |> Jason.decode!()
     end
 
     test "request selections on multiple queries" do
