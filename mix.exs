@@ -25,7 +25,7 @@ defmodule OpentelemetryAbsinthe.MixProject do
       {:absinthe, ">= 1.5.0", optional: true},
       {:jason, "~> 1.2"},
       {:opentelemetry_api, "~> 1.1"},
-      {:telemetry, "~> 0.4 or ~> 1.0.0"}
+      {:telemetry, "~> 0.4 or ~> 1.1.0"}
     ] ++ dev_deps()
   end
 
