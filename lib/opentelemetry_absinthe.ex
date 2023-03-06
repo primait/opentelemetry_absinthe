@@ -38,8 +38,10 @@ defmodule OpentelemetryAbsinthe do
       However some libraries(for example [dillonkearns/elm-graphql](https://github.com/dillonkearns/elm-graphql/issues/27) store the variables inline as a part of the query.
       If you expect clients to send dynamic data as a part of the graphql query you should disable this.
 
+    * `trace_request_name`(default: #{Keyword.fetch!(@config, :trace_request_name)}): attaches the graphql operation name when using batched queries as an attribute
+    * `trace_request_type`(default: #{Keyword.fetch!(@config, :trace_request_type)}): attaches the graphql query type(query, mutation or subscription) as an attribute
     * `trace_request_variables`(default: #{Keyword.fetch!(@config, :trace_request_variables)}): attaches the graphql variables as an attribute
-    * `trace_request_selections`(default: #{Keyword.fetch!(@config, :trace_request_selections)}): attaches the root fields queried as an attribute.
+    * `trace_request_selections`(default: #{Keyword.fetch!(@config, :trace_request_selections)}): attaches the root fields queried as an attribute
     
       For example given a query like:
       ```
