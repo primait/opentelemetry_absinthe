@@ -8,6 +8,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   (you can still call `OpentelemetryAbsinthe.Instrumentation.setup()` in your application startup
   code, it just won't do anything.)
   """
+  alias Absinthe.Blueprint
 
   require OpenTelemetry.Tracer, as: Tracer
   require Record
@@ -55,15 +56,16 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   end
 
   def handle_operation_start(_event_name, _measurements, metadata, config) do
-    params = metadata |> Map.get(:options, []) |> Keyword.get(:params, %{})
+    document = metadata.blueprint.input
+    variables = metadata |> Map.get(:options, []) |> Keyword.get(:variables, %{})
 
     attributes =
       []
       |> put_if(
         config.trace_request_variables,
-        {"graphql.request.variables", Jason.encode!(params["variables"])}
+        {"graphql.request.variables", Jason.encode!(variables)}
       )
-      |> put_if(config.trace_request_query, {"graphql.request.query", params["query"]})
+      |> put_if(config.trace_request_query, {"graphql.request.query", document})
 
     save_parent_ctx()
 
@@ -99,17 +101,13 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     :ok
   end
 
-  defp get_graphql_selections(data) do
-    case data do
-      %{blueprint: %{operations: [_ | _] = operations}} ->
-        operations
-        |> Enum.flat_map(& &1.selections)
-        |> Enum.map(& &1.name)
-        |> Enum.uniq()
-
-      _ ->
-        []
-    end
+  defp get_graphql_selections(%{blueprint: %Blueprint{} = blueprint}) do
+    blueprint
+    |> Blueprint.current_operation()
+    |> Kernel.||(%{})
+    |> Map.get(:selections, [])
+    |> Enum.map(& &1.name)
+    |> Enum.uniq()
   end
 
   # Surprisingly, that doesn't seem to by anything in the stdlib to conditionally

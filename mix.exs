@@ -6,13 +6,22 @@ defmodule OpentelemetryAbsinthe.MixProject do
       app: :opentelemetry_absinthe,
       version: "1.1.0",
       elixir: "~> 1.11",
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      dialyzer: [
+        # Since absinthe is an optional dependency we need to tell dialyxir to include it
+        plt_add_apps: [:absinthe]
+      ],
       package: package(),
       aliases: aliases(),
       description: description()
     ]
   end
+
+  # Specifies which paths to compile per environment.
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   def application do
     [
@@ -22,7 +31,7 @@ defmodule OpentelemetryAbsinthe.MixProject do
 
   defp deps do
     [
-      {:absinthe, ">= 1.5.0", optional: true},
+      {:absinthe, "~> 1.7.0", optional: true},
       {:jason, "~> 1.2"},
       {:opentelemetry_api, "~> 1.1"},
       {:telemetry, "~> 0.4 or ~> 1.0.0"}
@@ -31,10 +40,8 @@ defmodule OpentelemetryAbsinthe.MixProject do
 
   defp dev_deps do
     [
-      {:absinthe_plug, "~> 1.5", only: :test},
       {:opentelemetry, "~> 1.1", only: :test},
       {:opentelemetry_exporter, "~> 1.1", only: :test},
-      {:plug_cowboy, "~> 2.2", only: :test},
       {:credo, "~> 1.4", only: [:dev, :test]},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
