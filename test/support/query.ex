@@ -4,6 +4,7 @@ defmodule OpentelemetryAbsintheTest.Support.Query do
   import ExUnit.Assertions
   alias OpentelemetryAbsintheTest.Support.GraphQL.Schema
   require Record
+  require Logger
 
   @fields Record.extract(:span, from: "deps/opentelemetry/include/otel_span.hrl")
   Record.defrecordp(:span, @fields)
@@ -11,7 +12,9 @@ defmodule OpentelemetryAbsintheTest.Support.Query do
   def query_for_attrs(query, opts \\ []) do
     :otel_simple_processor.set_exporter(:otel_exporter_pid, self())
 
-    {:ok, _} = Absinthe.run(query, Schema, opts)
+    {:ok, data} = Absinthe.run(query, Schema, opts)
+    Logger.debug("Absinthe query returned: #{inspect(data)}")
+
     assert_receive {:span, span(attributes: {_, _, _, _, attributes})}, 5000
     attributes
   end
