@@ -1,1 +1,1 @@
-ExUnit.start(async: true)
+ExUnit.start(async: true, capture_log: true)
