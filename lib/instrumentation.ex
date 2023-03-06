@@ -8,6 +8,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   (you can still call `OpentelemetryAbsinthe.Instrumentation.setup()` in your application startup
   code, it just won't do anything.)
   """
+  alias Absinthe.Blueprint
 
   require OpenTelemetry.Tracer, as: Tracer
   require Record
@@ -100,17 +101,13 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     :ok
   end
 
-  defp get_graphql_selections(data) do
-    case data do
-      %{blueprint: %{operations: [_ | _] = operations}} ->
-        operations
-        |> Enum.flat_map(& &1.selections)
-        |> Enum.map(& &1.name)
-        |> Enum.uniq()
-
-      _ ->
-        []
-    end
+  defp get_graphql_selections(%{blueprint: %Blueprint{} = blueprint}) do
+    blueprint
+    |> Blueprint.current_operation()
+    |> Kernel.||(%{})
+    |> Map.get(:selections, [])
+    |> Enum.map(& &1.name)
+    |> Enum.uniq()
   end
 
   # Surprisingly, that doesn't seem to by anything in the stdlib to conditionally
