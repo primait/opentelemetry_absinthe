@@ -40,5 +40,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/primait/opentelemetry_absinthe/compare/2.0.0...HEAD
 [2.0.0]: https://github.com/primait/opentelemetry_absinthe/compare/1.1.0...2.0.0
-[1.1.0]: https://github.com/primait/opentelemetry_absinthe/releases/tag/1.1.0
-[1.1.0]: https://github.com/primait/opentelemetry_absinthe/releases/tag/1.1.0
+[1.1.0]: https://github.com/primait/opentelemetry_absinthe/compare/1.0.0...1.1.0
