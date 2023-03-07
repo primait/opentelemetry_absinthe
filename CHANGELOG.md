@@ -9,21 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- new `trace_request_selections` option to enable tracing root level GraphQL selections, which will be stored under `graphql.request.selections`
-- Attribute `graphql.operation.name` was added
-- Attribute `graphql.operation.type` was added
+- new `trace_request_selections` option to enable tracing root level GraphQL selections, which will be stored under `graphql.request.selections`.
+- attribute `graphql.operation.name` was added.
+- attribute `graphql.operation.type` was added.
+- span_name can now be set to `:dynamic`, causing it to be set dynamically based on the operation type and name, as recommended by [opentelemetry](https://opentelemetry.io/docs/reference/specification/trace/semantic_conventions/instrumentation/graphql/).
 
 ### Changed
 
 - BREAKING: `graphql.request.query` was renamed to `graphql.document`.
-- Span name was changed to `graphql.operation.type` + `graphql.operation.name` if those fields are present, else "GraphQL Operation"
-
-### Changed
-
-* `OpentelemetryAbsinthe.setup` can now optionally recieve the configuration. Previously `OpentelemetryAbsinthe.Instrumentation.setup` had to be used.
-* opentelemetry_absinthe will no longer log sensitive information by default.
+- BREAKING: the default value of span_name is now `:dynamic`
+- BREAKING: opentelemetry_absinthe will no longer log sensitive information by default.
   By default the graphql.request.variables, graphql.response.errors and graphql.response.result attributes will no longer be emited.
   The previous behavior can be restored by setting the opentelemetry_absinthe configuration options.
+
+- `OpentelemetryAbsinthe.setup` can now optionally recieve the configuration. Previously `OpentelemetryAbsinthe.Instrumentation.setup` had to be used.
+
+### Deprecated
+- setting the span name to a static string.
 
 ## [1.1.0] - 2022-09-21
 

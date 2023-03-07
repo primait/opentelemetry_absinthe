@@ -12,6 +12,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
   require OpenTelemetry.Tracer, as: Tracer
   require OpenTelemetry.SemanticConventions.Trace, as: Conventions
+  require Logger
   require Record
 
   @span_ctx_fields Record.extract(:span_ctx,
@@ -42,6 +43,10 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       |> Keyword.merge(Application.get_env(:opentelemetry_absinthe, :trace_options, []))
       |> Keyword.merge(instrumentation_opts)
       |> Enum.into(%{})
+
+    if is_binary(config.span_name) do
+      Logger.warn("The opentelemetry_absinthe span_name option is deprecated and will be removed in the future")
+    end
 
     :telemetry.attach(
       {__MODULE__, :operation_start},
