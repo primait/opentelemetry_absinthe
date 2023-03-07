@@ -18,4 +18,14 @@ defmodule OpentelemetryAbsintheTest.Support.Query do
     assert_receive {:span, span(attributes: {_, _, _, _, attributes})}, 5000
     attributes
   end
+
+  def query_for_span_name(query, opts \\ []) do
+    :otel_simple_processor.set_exporter(:otel_exporter_pid, self())
+
+    {:ok, data} = Absinthe.run(query, Schema, opts)
+    Logger.debug("Absinthe query returned: #{inspect(data)}")
+
+    assert_receive {:span, span(name: name)}, 5000
+    name
+  end
 end

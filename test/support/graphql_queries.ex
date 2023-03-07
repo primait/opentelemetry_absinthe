@@ -55,4 +55,8 @@ defmodule OpentelemetryAbsintheTest.Support.GraphQL.Queries do
     }
     """
   end
+
+  def invalid_query do
+    "invalid_query"
+  end
 end

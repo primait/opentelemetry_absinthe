@@ -9,7 +9,7 @@ defmodule OpentelemetryAbsintheTest.Extraction do
       OpentelemetryAbsinthe.Instrumentation.setup(trace_request_query: true)
       query = Queries.query()
 
-      assert ^query = query |> Query.query_for_attrs() |> Map.fetch!("graphql.request.query")
+      assert ^query = query |> Query.query_for_attrs() |> Map.fetch!("graphql.document")
     end
 
     test "request variables" do

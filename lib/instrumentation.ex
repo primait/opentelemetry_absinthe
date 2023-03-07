@@ -11,6 +11,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   alias Absinthe.Blueprint
 
   require OpenTelemetry.Tracer, as: Tracer
+  require OpenTelemetry.SemanticConventions.Trace, as: Conventions
+  require Logger
   require Record
 
   @span_ctx_fields Record.extract(:span_ctx,
@@ -19,9 +21,16 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
   Record.defrecord(:span_ctx, @span_ctx_fields)
 
+  @default_operation_span "GraphQL Operation"
+  @graphql_document_attr Atom.to_string(Conventions.graphql_document())
+  @graphql_operation_name_attr Atom.to_string(Conventions.graphql_operation_name())
+  @graphql_operation_type_attr Atom.to_string(Conventions.graphql_operation_type())
+
   @default_config [
-    span_name: "absinthe graphql resolution",
+    span_name: :dynamic,
     trace_request_query: true,
+    trace_request_name: true,
+    trace_request_type: true,
     trace_request_variables: false,
     trace_request_selections: true,
     trace_response_result: false,
@@ -34,6 +43,10 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       |> Keyword.merge(Application.get_env(:opentelemetry_absinthe, :trace_options, []))
       |> Keyword.merge(instrumentation_opts)
       |> Enum.into(%{})
+
+    if is_binary(config.span_name) do
+      Logger.warn("The opentelemetry_absinthe span_name option is deprecated and will be removed in the future")
+    end
 
     :telemetry.attach(
       {__MODULE__, :operation_start},
@@ -65,20 +78,35 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
         config.trace_request_variables,
         {"graphql.request.variables", Jason.encode!(variables)}
       )
-      |> put_if(config.trace_request_query, {"graphql.request.query", document})
+      |> put_if(config.trace_request_query, {@graphql_document_attr, document})
 
     save_parent_ctx()
 
-    new_ctx = Tracer.start_span(config.span_name, %{attributes: attributes})
+    span_name = span_name(nil, nil, config.span_name)
+    new_ctx = Tracer.start_span(span_name, %{attributes: attributes})
 
     Tracer.set_current_span(new_ctx)
   end
 
   def handle_operation_stop(_event_name, _measurements, data, config) do
+    operation_type = get_operation_type(data)
+    operation_name = get_operation_name(data)
+
+    span_name = span_name(operation_type, operation_name, config.span_name)
+    Tracer.update_name(span_name)
+
     errors = data.blueprint.result[:errors]
 
     result_attributes =
       []
+      |> put_if(
+        config.trace_request_type,
+        {@graphql_operation_type_attr, operation_type}
+      )
+      |> put_if(
+        config.trace_request_name,
+        {@graphql_operation_name_attr, operation_name}
+      )
       |> put_if(
         config.trace_response_result,
         {"graphql.response.result", Jason.encode!(data.blueprint.result)}
@@ -113,6 +141,19 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   def default_config do
     @default_config
   end
+
+  defp get_operation_type(%{blueprint: %Blueprint{} = blueprint}) do
+    blueprint |> Absinthe.Blueprint.current_operation() |> Kernel.||(%{}) |> Map.get(:type)
+  end
+
+  defp get_operation_name(%{blueprint: %Blueprint{} = blueprint}) do
+    blueprint |> Absinthe.Blueprint.current_operation() |> Kernel.||(%{}) |> Map.get(:name)
+  end
+
+  defp span_name(_, _, name) when is_binary(name), do: name
+  defp span_name(nil, _, _), do: @default_operation_span
+  defp span_name(op_type, nil, _), do: Atom.to_string(op_type)
+  defp span_name(op_type, op_name, _), do: "#{Atom.to_string(op_type)} #{op_name}"
 
   # Surprisingly, that doesn't seem to by anything in the stdlib to conditionally
   # put stuff in a list / keyword list.
