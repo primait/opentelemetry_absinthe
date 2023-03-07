@@ -20,8 +20,13 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
   Record.defrecord(:span_ctx, @span_ctx_fields)
 
+  @default_operation_span "GraphQL Operation"
+  @graphql_document_attr Atom.to_string(Conventions.graphql_document())
+  @graphql_operation_name_attr Atom.to_string(Conventions.graphql_operation_name())
+  @graphql_operation_type_attr Atom.to_string(Conventions.graphql_operation_type())
+
   @default_config [
-    span_name: "GraphQL Operation",
+    span_name: :dynamic,
     trace_request_query: true,
     trace_request_name: true,
     trace_request_type: true,
@@ -30,10 +35,6 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     trace_response_result: false,
     trace_response_errors: false
   ]
-
-  @graphql_document_attr Atom.to_string(Conventions.graphql_document())
-  @graphql_operation_name_attr Atom.to_string(Conventions.graphql_operation_name())
-  @graphql_operation_type_attr Atom.to_string(Conventions.graphql_operation_type())
 
   def setup(instrumentation_opts \\ []) do
     config =
@@ -76,7 +77,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
     save_parent_ctx()
 
-    new_ctx = Tracer.start_span(config.span_name, %{attributes: attributes})
+    span_name = span_name(nil, nil, config.span_name)
+    new_ctx = Tracer.start_span(span_name, %{attributes: attributes})
 
     Tracer.set_current_span(new_ctx)
   end
@@ -86,7 +88,6 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     operation_name = get_operation_name(data)
 
     span_name = span_name(operation_type, operation_name, config.span_name)
-
     Tracer.update_name(span_name)
 
     errors = data.blueprint.result[:errors]
@@ -144,9 +145,10 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     blueprint |> Absinthe.Blueprint.current_operation() |> Kernel.||(%{}) |> Map.get(:name)
   end
 
-  defp span_name(nil, _, default), do: default
-  defp span_name(op_type, nil, _), do: op_type
-  defp span_name(op_type, op_name, _), do: "#{op_type} #{op_name}"
+  defp span_name(_, _, name) when is_binary(name), do: name
+  defp span_name(nil, _, _), do: @default_operation_span
+  defp span_name(op_type, nil, _), do: Atom.to_string(op_type)
+  defp span_name(op_type, op_name, _), do: "#{Atom.to_string(op_type)} #{op_name}"
 
   # Surprisingly, that doesn't seem to by anything in the stdlib to conditionally
   # put stuff in a list / keyword list.
