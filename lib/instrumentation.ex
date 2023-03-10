@@ -22,9 +22,9 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   Record.defrecord(:span_ctx, @span_ctx_fields)
 
   @default_operation_span "GraphQL Operation"
-  @graphql_document_attr Atom.to_string(Conventions.graphql_document())
-  @graphql_operation_name_attr Atom.to_string(Conventions.graphql_operation_name())
-  @graphql_operation_type_attr Atom.to_string(Conventions.graphql_operation_type())
+  @graphql_document Conventions.graphql_document()
+  @graphql_operation_name Conventions.graphql_operation_name()
+  @graphql_operation_type Conventions.graphql_operation_type()
 
   @default_config [
     span_name: :dynamic,
@@ -76,9 +76,9 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       []
       |> put_if(
         config.trace_request_variables,
-        {"graphql.request.variables", Jason.encode!(variables)}
+        {:"graphql.request.variables", Jason.encode!(variables)}
       )
-      |> put_if(config.trace_request_query, {@graphql_document_attr, document})
+      |> put_if(config.trace_request_query, {@graphql_document, document})
 
     save_parent_ctx()
 
@@ -101,23 +101,23 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       []
       |> put_if(
         config.trace_request_type,
-        {@graphql_operation_type_attr, operation_type}
+        {@graphql_operation_type, operation_type}
       )
       |> put_if(
         config.trace_request_name,
-        {@graphql_operation_name_attr, operation_name}
+        {@graphql_operation_name, operation_name}
       )
       |> put_if(
         config.trace_response_result,
-        {"graphql.response.result", Jason.encode!(data.blueprint.result)}
+        {:"graphql.response.result", Jason.encode!(data.blueprint.result)}
       )
       |> put_if(
         config.trace_response_errors,
-        {"graphql.response.errors", Jason.encode!(errors)}
+        {:"graphql.response.errors", Jason.encode!(errors)}
       )
       |> put_if(
         config.trace_request_selections,
-        fn -> {"graphql.request.selections", data |> get_graphql_selections() |> Jason.encode!()} end
+        fn -> {:"graphql.request.selections", data |> get_graphql_selections() |> Jason.encode!()} end
       )
 
     set_status(errors)
