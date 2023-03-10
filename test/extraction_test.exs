@@ -4,12 +4,14 @@ defmodule OpentelemetryAbsintheTest.Extraction do
   alias OpentelemetryAbsintheTest.Support.GraphQL.Queries
   alias OpentelemetryAbsintheTest.Support.Query
 
+  @graphql_request_selections :"graphql.request.selections"
+
   describe "extracts" do
     test "request query" do
       OpentelemetryAbsinthe.Instrumentation.setup(trace_request_query: true)
       query = Queries.query()
 
-      assert ^query = query |> Query.query_for_attrs() |> Map.fetch!("graphql.document")
+      assert ^query = query |> Query.query_for_attrs() |> Map.fetch!(:"graphql.document")
     end
 
     test "request variables" do
@@ -19,7 +21,7 @@ defmodule OpentelemetryAbsintheTest.Extraction do
       assert ^variables =
                Queries.query()
                |> Query.query_for_attrs(variables: variables)
-               |> Map.fetch!("graphql.request.variables")
+               |> Map.fetch!(:"graphql.request.variables")
                |> Jason.decode!()
     end
 
@@ -29,7 +31,7 @@ defmodule OpentelemetryAbsintheTest.Extraction do
       assert ["book"] =
                Queries.query()
                |> Query.query_for_attrs(variables: %{"isbn" => "A1"})
-               |> Map.fetch!("graphql.request.selections")
+               |> Map.fetch!(@graphql_request_selections)
                |> Jason.decode!()
     end
 
@@ -39,7 +41,7 @@ defmodule OpentelemetryAbsintheTest.Extraction do
       assert ["create_book"] =
                Queries.mutation()
                |> Query.query_for_attrs(variables: %{"isbn" => "A1"})
-               |> Map.fetch!("graphql.request.selections")
+               |> Map.fetch!(@graphql_request_selections)
                |> Jason.decode!()
     end
 
@@ -49,7 +51,7 @@ defmodule OpentelemetryAbsintheTest.Extraction do
       assert ["book"] =
                Queries.aliased_query()
                |> Query.query_for_attrs(variables: %{"isbn" => "A1"})
-               |> Map.fetch!("graphql.request.selections")
+               |> Map.fetch!(@graphql_request_selections)
                |> Jason.decode!()
     end
 
@@ -59,13 +61,13 @@ defmodule OpentelemetryAbsintheTest.Extraction do
       assert ["book"] =
                Queries.batch_queries()
                |> Query.query_for_attrs(variables: %{"isbn" => "A1"}, operation_name: "OperationOne")
-               |> Map.fetch!("graphql.request.selections")
+               |> Map.fetch!(@graphql_request_selections)
                |> Jason.decode!()
 
       assert ["books"] =
                Queries.batch_queries()
                |> Query.query_for_attrs(variables: %{"isbn" => "A1"}, operation_name: "OperationTwo")
-               |> Map.fetch!("graphql.request.selections")
+               |> Map.fetch!(@graphql_request_selections)
                |> Jason.decode!()
     end
 
@@ -75,7 +77,7 @@ defmodule OpentelemetryAbsintheTest.Extraction do
       result =
         Queries.query()
         |> Query.query_for_attrs(variables: %{"isbn" => "A1"})
-        |> Map.fetch!("graphql.response.result")
+        |> Map.fetch!(:"graphql.response.result")
         |> Jason.decode!()
 
       assert %{"data" => %{"book" => %{"author" => %{"age" => 18, "name" => "Ale Ali"}, "title" => "Fire"}}} = result
@@ -87,7 +89,7 @@ defmodule OpentelemetryAbsintheTest.Extraction do
       errors =
         Queries.query()
         |> Query.query_for_attrs()
-        |> Map.fetch!("graphql.response.errors")
+        |> Map.fetch!(:"graphql.response.errors")
         |> Jason.decode!()
 
       assert [

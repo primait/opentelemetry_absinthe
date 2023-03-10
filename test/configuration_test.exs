@@ -4,6 +4,11 @@ defmodule OpentelemetryAbsintheTest.Configuration do
   alias OpentelemetryAbsintheTest.Support.GraphQL.Queries
   alias OpentelemetryAbsintheTest.Support.Query
 
+  @graphql_document :"graphql.document"
+  @graphql_operation_name :"graphql.operation.name"
+  @graphql_operation_type :"graphql.operation.type"
+  @graphql_request_selections :"graphql.request.selections"
+
   doctest OpentelemetryAbsinthe.Instrumentation
 
   describe "trace configuration" do
@@ -13,10 +18,10 @@ defmodule OpentelemetryAbsintheTest.Configuration do
       attributes = Query.query_for_attrs(Queries.query(), variables: %{"isbn" => "A1"})
 
       assert [
-               "graphql.document",
-               "graphql.operation.name",
-               "graphql.operation.type",
-               "graphql.request.selections"
+               @graphql_document,
+               @graphql_operation_name,
+               @graphql_operation_type,
+               @graphql_request_selections
              ] = attributes |> Map.keys() |> Enum.sort()
     end
 
@@ -30,10 +35,10 @@ defmodule OpentelemetryAbsintheTest.Configuration do
       attributes = Query.query_for_attrs(Queries.query(), variables: %{"isbn" => "A1"})
 
       assert [
-               "graphql.operation.name",
-               "graphql.operation.type",
-               "graphql.request.selections",
-               "graphql.response.result"
+               @graphql_operation_name,
+               @graphql_operation_type,
+               @graphql_request_selections,
+               :"graphql.response.result"
              ] = attributes |> Map.keys() |> Enum.sort()
     end
 
@@ -47,9 +52,9 @@ defmodule OpentelemetryAbsintheTest.Configuration do
       attributes = Query.query_for_attrs(Queries.query(), variables: %{"isbn" => "A1"})
 
       assert [
-               "graphql.document",
-               "graphql.operation.name",
-               "graphql.operation.type"
+               @graphql_document,
+               @graphql_operation_name,
+               @graphql_operation_type
              ] = attributes |> Map.keys() |> Enum.sort()
     end
   end
