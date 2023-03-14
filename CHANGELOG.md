@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- absinthe is now a required dependency. The library failed to compile since version 2.0.0 with it being optional so this is not a breaking change
+
 ## [2.0.0] - 2023-03-07
 
 ### Added
