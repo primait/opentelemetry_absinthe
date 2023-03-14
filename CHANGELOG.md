@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2023-03-14
+
 ### Changed
 
-- absinthe is now a required dependency. The library failed to compile since version 2.0.0 with it being optional so this is not a breaking change
+- absinthe is now a required dependency. The library failed to compile since version 2.0.0 with it being optional so this is not a breaking change.
+- attribute keys are now atoms, which should offer minor performance improvements.
+- loosened the telemetry version requirement from `~> 0.4 or ~> 1.0.0` to `~> 0.4 or ~> 1.0`
 
 ## [2.0.0] - 2023-03-07
 
@@ -42,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   If you're upgrading to opentelemetry_absinthe 1.1.0, it is therefore recommended to also upgrade to OpenTelemetry API 1.1.0
   in order to keep the opentelemetry log metadata.
 
-[Unreleased]: https://github.com/primait/opentelemetry_absinthe/compare/2.0.0...HEAD
+[Unreleased]: https://github.com/primait/opentelemetry_absinthe/compare/2.0.1...HEAD
+[2.0.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/primait/opentelemetry_absinthe/compare/1.1.0...2.0.0
 [1.1.0]: https://github.com/primait/opentelemetry_absinthe/compare/1.0.0...1.1.0
