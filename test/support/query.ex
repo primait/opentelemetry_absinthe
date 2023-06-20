@@ -16,7 +16,7 @@ defmodule OpentelemetryAbsintheTest.Support.Query do
     Logger.debug("Absinthe query returned: #{inspect(data)}")
 
     assert_receive {:span, span}, 5000
-    Logger.debug("Recieved span", span: span)
+    Logger.debug("Recieved span: #{inspect(span)}")
     span
   end
 
