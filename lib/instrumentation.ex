@@ -83,7 +83,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     save_parent_ctx()
 
     span_name = span_name(nil, nil, config.span_name)
-    new_ctx = Tracer.start_span(span_name, %{attributes: attributes})
+    new_ctx = Tracer.start_span(span_name, %{kind: :server, attributes: attributes})
 
     Tracer.set_current_span(new_ctx)
   end
