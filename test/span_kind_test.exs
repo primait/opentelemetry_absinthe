@@ -4,7 +4,7 @@ defmodule OpentelemetryAbsintheTest.SpanKind do
   alias OpentelemetryAbsintheTest.Support.GraphQL.Queries
   alias OpentelemetryAbsintheTest.Support.Query
 
-  test "span kind is client" do
+  test "span kind is server" do
     OpentelemetryAbsinthe.Instrumentation.setup()
     :server = Query.query_for_span_kind(Queries.invalid_query())
   end
