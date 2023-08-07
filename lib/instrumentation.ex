@@ -45,7 +45,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       |> Enum.into(%{})
 
     if is_binary(config.span_name) do
-      Logger.warn("The opentelemetry_absinthe span_name option is deprecated and will be removed in the future")
+      Logger.warning("The opentelemetry_absinthe span_name option is deprecated and will be removed in the future")
     end
 
     :telemetry.attach(
