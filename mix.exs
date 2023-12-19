@@ -1,10 +1,12 @@
 defmodule OpentelemetryAbsinthe.MixProject do
   use Mix.Project
 
+  @version "2.0.1-rc.0"
+
   def project do
     [
       app: :opentelemetry_absinthe,
-      version: "2.0.1",
+      version: @version,
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -29,7 +31,10 @@ defmodule OpentelemetryAbsinthe.MixProject do
   defp docs do
     [
       main: "OpentelemetryAbsinthe",
-      formatters: ["html"]
+      source_ref: @version,
+      source_url: @source_url,
+      formatters: ["html"],
+      extras: ["README.md"]
     ]
   end
 
