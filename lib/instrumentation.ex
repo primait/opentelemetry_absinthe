@@ -15,6 +15,18 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   require Logger
   require Record
 
+  @telemetry [:opentelemetry_absinthe, :graphql, :handled]
+
+  @type graphql_handled_event_metadata :: %{
+          operation_name: String.t() | nil,
+          operation_type: :query | :mutation,
+          status: :ok | :error
+        }
+
+  @type graphql_handled_event_measurements :: %{
+          duration: :int
+        }
+
   @span_ctx_fields Record.extract(:span_ctx,
                      from_lib: "opentelemetry_api/include/opentelemetry.hrl"
                    )
@@ -88,41 +100,39 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     Tracer.set_current_span(new_ctx)
   end
 
-  def handle_operation_stop(_event_name, _measurements, data, config) do
+  def handle_operation_stop(_event_name, measurements, data, config) do
     operation_type = get_operation_type(data)
     operation_name = get_operation_name(data)
 
-    span_name = span_name(operation_type, operation_name, config.span_name)
-    Tracer.update_name(span_name)
+    operation_type
+    |> span_name(operation_name, config.span_name)
+    |> Tracer.update_name()
 
     errors = data.blueprint.result[:errors]
+    status = status(errors)
+    set_status(status)
 
-    result_attributes =
-      []
-      |> put_if(
-        config.trace_request_type,
-        {@graphql_operation_type, operation_type}
-      )
-      |> put_if(
-        config.trace_request_name,
-        {@graphql_operation_name, operation_name}
-      )
-      |> put_if(
-        config.trace_response_result,
-        {:"graphql.response.result", Jason.encode!(data.blueprint.result)}
-      )
-      |> put_if(
-        config.trace_response_errors,
-        {:"graphql.response.errors", Jason.encode!(errors)}
-      )
-      |> put_if(
-        config.trace_request_selections,
-        fn -> {:"graphql.request.selections", data |> get_graphql_selections() |> Jason.encode!()} end
-      )
+    []
+    |> put_if(config.trace_request_type, {@graphql_operation_type, operation_type})
+    |> put_if(config.trace_request_name, {@graphql_operation_name, operation_name})
+    |> put_if(config.trace_response_result, {:"graphql.response.result", Jason.encode!(data.blueprint.result)})
+    |> put_if(config.trace_response_errors, {:"graphql.response.errors", Jason.encode!(errors)})
+    |> put_if(
+      config.trace_request_selections,
+      fn -> {:"graphql.request.selections", data |> get_graphql_selections() |> Jason.encode!()} end
+    )
+    |> Tracer.set_attributes()
 
-    set_status(errors)
+    :telemetry.execute(
+      @telemetry,
+      measurements,
+      %{
+        operation_name: operation_name,
+        operation_type: operation_type,
+        status: status
+      }
+    )
 
-    Tracer.set_attributes(result_attributes)
     Tracer.end_span()
 
     restore_parent_ctx()
@@ -176,8 +186,10 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     Tracer.set_current_span(ctx)
   end
 
-  # set status as `:error` in case of errors in the graphql response
-  defp set_status(nil), do: :ok
-  defp set_status([]), do: :ok
-  defp set_status(_errors), do: Tracer.set_status(OpenTelemetry.status(:error, ""))
+  defp status(nil), do: :ok
+  defp status([]), do: :ok
+  defp status(_error), do: :error
+
+  defp set_status(:ok), do: :ok
+  defp set_status(:error), do: Tracer.set_status(OpenTelemetry.status(:error, ""))
 end
