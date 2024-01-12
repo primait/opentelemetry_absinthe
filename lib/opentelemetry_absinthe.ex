@@ -76,7 +76,7 @@ defmodule OpentelemetryAbsinthe do
     OpentelemetryAbsinthe exposes `telemetry` events which can be hooked into using `:telemetry.attach/4` or `:telemetry.attach_many/4`.
     The events exposed are:
 
-    - `[:opentelemetry_absinthe, :graphql, :handled]` for when a GraphQl query has been handled, the metadata and measurements are defined in `OpentelemetryAbsinth.Instrumentation.graphql_handled_event_metadata()` and `OpentelemetryAbsinth.Instrumentation.graphql_handled_event_measurements()`
+    - `[:opentelemetry_absinthe, :graphql, :handled]` for when a GraphQl query has been handled, the metadata and measurements are defined in `OpentelemetryAbsinthe.Instrumentation.graphql_handled_event_metadata()` and `OpentelemetryAbsinthe.Instrumentation.graphql_handled_event_measurements()`
   """
 
   defdelegate setup(instrumentation_opts \\ []), to: Instrumentation
