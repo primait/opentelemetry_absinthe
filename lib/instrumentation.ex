@@ -20,6 +20,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   @type graphql_handled_event_metadata :: %{
           operation_name: String.t() | nil,
           operation_type: :query | :mutation,
+          schema: Absinthe.Schema.t(),
           status: :ok | :error
         }
 
@@ -129,6 +130,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       %{
         operation_name: operation_name,
         operation_type: operation_type,
+        schema: data.blueprint.schema,
         status: status
       }
     )
