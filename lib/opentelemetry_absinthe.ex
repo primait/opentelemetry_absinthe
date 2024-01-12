@@ -71,12 +71,12 @@ defmodule OpentelemetryAbsinthe do
     * `trace_response_result`(default: #{Keyword.fetch!(@config, :trace_response_result)}): attaches the result returned by the server as an attribute
     * `trace_response_errors`(default: #{Keyword.fetch!(@config, :trace_response_errors)}): attaches the errors returned by the server as an attribute
 
-    ## Telemetry
+  ## Telemetry
 
-    OpentelemetryAbsinthe exposes `telemetry` events which can be hooked into using `:telemetry.attach/4` or `:telemetry.attach_many/4`.
-    The events exposed are:
+  OpentelemetryAbsinthe exposes `telemetry` events which can be hooked into using `:telemetry.attach/4` or `:telemetry.attach_many/4`.
+  The events exposed are:
 
-    - `[:opentelemetry_absinthe, :graphql, :handled]` for when a GraphQl query has been handled, the metadata and measurements are defined in `OpentelemetryAbsinthe.Instrumentation.graphql_handled_event_metadata()` and `OpentelemetryAbsinthe.Instrumentation.graphql_handled_event_measurements()`
+  - `[:opentelemetry_absinthe, :graphql, :handled]` for when a GraphQl query has been handled, the metadata and measurements are defined in `OpentelemetryAbsinthe.Instrumentation.graphql_handled_event_metadata()` and `OpentelemetryAbsinthe.Instrumentation.graphql_handled_event_measurements()`
   """
 
   defdelegate setup(instrumentation_opts \\ []), to: Instrumentation
