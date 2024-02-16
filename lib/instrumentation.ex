@@ -21,7 +21,14 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
           operation_name: String.t() | nil,
           operation_type: :query | :mutation,
           schema: Absinthe.Schema.t(),
+          errors: [graphql_handled_event_error()] | nil,
           status: :ok | :error
+        }
+
+  @type graphql_handled_event_error :: %{
+          locations: [%{column: integer(), line: integer()}],
+          message: String.t(),
+          path: [String.t()]
         }
 
   @type graphql_handled_event_measurements :: %{
