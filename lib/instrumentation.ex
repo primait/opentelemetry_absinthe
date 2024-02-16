@@ -131,6 +131,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
         operation_name: operation_name,
         operation_type: operation_type,
         schema: data.blueprint.schema,
+        errors: errors,
         status: status
       }
     )
