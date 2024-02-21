@@ -2,7 +2,7 @@ defmodule OpentelemetryAbsinthe.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/primait/opentelemetry_absinthe"
-  @version "2.2.0"
+  @version "2.2.1"
 
   def project do
     [
@@ -41,7 +41,7 @@ defmodule OpentelemetryAbsinthe.MixProject do
 
   defp deps do
     [
-      {:absinthe, "~> 1.7.0"},
+      {:absinthe, "~> 1.7"},
       {:jason, "~> 1.2"},
       {:opentelemetry_api, "~> 1.1"},
       {:telemetry, "~> 0.4 or ~> 1.0"}
