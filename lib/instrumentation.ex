@@ -72,20 +72,36 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       {__MODULE__, :operation_start},
       [:absinthe, :execute, :operation, :start],
       &__MODULE__.handle_operation_start/4,
-      config
+      Map.put(config, :type, :operation)
     )
 
     :telemetry.attach(
       {__MODULE__, :operation_stop},
       [:absinthe, :execute, :operation, :stop],
       &__MODULE__.handle_operation_stop/4,
-      config
+      Map.put(config, :type, :operation)
+    )
+
+    :telemetry.attach(
+      {__MODULE__, :publish_start},
+      [:absinthe, :subscription, :publish, :start],
+      &__MODULE__.handle_operation_start/4,
+      Map.put(config, :type, :publish)
+    )
+
+    :telemetry.attach(
+      {__MODULE__, :publish_stop},
+      [:absinthe, :subscription, :publish, :stop],
+      &__MODULE__.handle_operation_stop/4,
+      Map.put(config, :type, :publish)
     )
   end
 
   def teardown do
     :telemetry.detach({__MODULE__, :operation_start})
     :telemetry.detach({__MODULE__, :operation_stop})
+    :telemetry.detach({__MODULE__, :publish_start})
+    :telemetry.detach({__MODULE__, :publish_stop})
   end
 
   def handle_operation_start(_event_name, _measurements, metadata, config) do
@@ -99,6 +115,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
         {:"graphql.request.variables", Jason.encode!(variables)}
       )
       |> put_if(config.trace_request_query, {@graphql_document, document})
+      |> put_if(true, {:"graphql.event.type", config.type})
 
     save_parent_ctx()
 
@@ -129,6 +146,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       config.trace_request_selections,
       fn -> {:"graphql.request.selections", data |> get_graphql_selections() |> Jason.encode!()} end
     )
+    |> put_if(true, {:"graphql.event.type", config.type})
     |> Tracer.set_attributes()
 
     :telemetry.execute(
