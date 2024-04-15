@@ -8,6 +8,7 @@ defmodule OpentelemetryAbsintheTest.Configuration do
   @graphql_operation_name :"graphql.operation.name"
   @graphql_operation_type :"graphql.operation.type"
   @graphql_request_selections :"graphql.request.selections"
+  @graphql_event_type :"graphql.event.type"
 
   doctest OpentelemetryAbsinthe.Instrumentation
 
@@ -19,6 +20,7 @@ defmodule OpentelemetryAbsintheTest.Configuration do
 
       assert [
                @graphql_document,
+               @graphql_event_type,
                @graphql_operation_name,
                @graphql_operation_type,
                @graphql_request_selections
@@ -35,6 +37,7 @@ defmodule OpentelemetryAbsintheTest.Configuration do
       attributes = Query.query_for_attrs(Queries.query(), variables: %{"isbn" => "A1"})
 
       assert [
+               @graphql_event_type,
                @graphql_operation_name,
                @graphql_operation_type,
                @graphql_request_selections,
@@ -53,6 +56,7 @@ defmodule OpentelemetryAbsintheTest.Configuration do
 
       assert [
                @graphql_document,
+               @graphql_event_type,
                @graphql_operation_name,
                @graphql_operation_type
              ] = attributes |> Map.keys() |> Enum.sort()

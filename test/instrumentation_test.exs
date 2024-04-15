@@ -14,6 +14,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
 
   @trace_attributes [
     :"graphql.document",
+    :"graphql.event.type",
     :"graphql.operation.name",
     :"graphql.operation.type",
     :"graphql.request.selections",
