@@ -115,7 +115,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
         {:"graphql.request.variables", Jason.encode!(variables)}
       )
       |> put_if(config.trace_request_query, {@graphql_document, document})
-      |> put_if(true, {:"graphql.event.type", config.type})
+      |> List.insert_at(0, {:"graphql.event.type", config.type})
 
     save_parent_ctx()
 
