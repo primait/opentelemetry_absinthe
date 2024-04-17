@@ -15,8 +15,6 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   require Logger
   require Record
 
-  @telemetry_provider Application.compile_env(:opentelemetry_absinthe, :telemetry_provider, :telemetry)
-
   @type graphql_handled_event_metadata :: %{
           operation_name: String.t() | nil,
           operation_type: :query | :mutation,
@@ -69,14 +67,14 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       Logger.warning("The opentelemetry_absinthe span_name option is deprecated and will be removed in the future")
     end
 
-    @telemetry_provider.attach(
+    telemetry_provider().attach(
       {__MODULE__, :operation_start},
       [:absinthe, :execute, :operation, :start],
       &__MODULE__.handle_start/4,
       Map.put(config, :type, :operation)
     )
 
-    @telemetry_provider.attach(
+    telemetry_provider().attach(
       {__MODULE__, :operation_stop},
       [:absinthe, :execute, :operation, :stop],
       &__MODULE__.handle_stop/4,
@@ -84,14 +82,14 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     )
 
     if config.trace_subscriptions do
-      @telemetry_provider.attach(
+      telemetry_provider().attach(
         {__MODULE__, :publish_start},
         [:absinthe, :subscription, :publish, :start],
         &__MODULE__.handle_start/4,
         Map.put(config, :type, :publish)
       )
 
-      @telemetry_provider.attach(
+      telemetry_provider().attach(
         {__MODULE__, :publish_stop},
         [:absinthe, :subscription, :publish, :stop],
         &__MODULE__.handle_stop/4,
@@ -101,10 +99,10 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   end
 
   def teardown do
-    @telemetry_provider.detach({__MODULE__, :operation_start})
-    @telemetry_provider.detach({__MODULE__, :operation_stop})
-    @telemetry_provider.detach({__MODULE__, :publish_start})
-    @telemetry_provider.detach({__MODULE__, :publish_stop})
+    telemetry_provider().detach({__MODULE__, :operation_start})
+    telemetry_provider().detach({__MODULE__, :operation_stop})
+    telemetry_provider().detach({__MODULE__, :publish_start})
+    telemetry_provider().detach({__MODULE__, :publish_stop})
   end
 
   def handle_start(_event_name, _measurements, metadata, config) do
@@ -152,7 +150,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     |> List.insert_at(0, {:"graphql.event.type", config.type})
     |> Tracer.set_attributes()
 
-    @telemetry_provider.execute(
+    telemetry_provider().execute(
       [:opentelemetry_absinthe, :graphql, :handled],
       measurements,
       %{
@@ -223,4 +221,6 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
   defp set_status(:ok), do: :ok
   defp set_status(:error), do: Tracer.set_status(OpenTelemetry.status(:error, ""))
+
+  defp telemetry_provider(), do: Application.get_env(:opentelemetry_absinthe, :telemetry_provider, :telemetry)
 end
