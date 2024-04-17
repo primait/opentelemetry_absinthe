@@ -71,28 +71,28 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     :telemetry.attach(
       {__MODULE__, :operation_start},
       [:absinthe, :execute, :operation, :start],
-      &__MODULE__.handle_operation_start/4,
+      &__MODULE__.handle_start/4,
       Map.put(config, :type, :operation)
     )
 
     :telemetry.attach(
       {__MODULE__, :operation_stop},
       [:absinthe, :execute, :operation, :stop],
-      &__MODULE__.handle_operation_stop/4,
+      &__MODULE__.handle_stop/4,
       Map.put(config, :type, :operation)
     )
 
     :telemetry.attach(
       {__MODULE__, :publish_start},
       [:absinthe, :subscription, :publish, :start],
-      &__MODULE__.handle_operation_start/4,
+      &__MODULE__.handle_start/4,
       Map.put(config, :type, :publish)
     )
 
     :telemetry.attach(
       {__MODULE__, :publish_stop},
       [:absinthe, :subscription, :publish, :stop],
-      &__MODULE__.handle_operation_stop/4,
+      &__MODULE__.handle_stop/4,
       Map.put(config, :type, :publish)
     )
   end
@@ -104,7 +104,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     :telemetry.detach({__MODULE__, :publish_stop})
   end
 
-  def handle_operation_start(_event_name, _measurements, metadata, config) do
+  def handle_start(_event_name, _measurements, metadata, config) do
     document = metadata.blueprint.input
     variables = metadata |> Map.get(:options, []) |> Keyword.get(:variables, %{})
 
@@ -125,7 +125,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     Tracer.set_current_span(new_ctx)
   end
 
-  def handle_operation_stop(_event_name, measurements, data, config) do
+  def handle_stop(_event_name, measurements, data, config) do
     operation_type = get_operation_type(data)
     operation_name = get_operation_name(data)
 

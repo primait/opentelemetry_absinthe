@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Attach to `[:absinthe, :subscription, :publish]` (both `:start` and `:stop`)
+- New `graphql.event.type` trace attribute, with value `operation` or `publish`
+
 ## [2.2.1] - 2024-02-21
 
 ### Changed
