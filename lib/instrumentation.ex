@@ -146,7 +146,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       config.trace_request_selections,
       fn -> {:"graphql.request.selections", data |> get_graphql_selections() |> Jason.encode!()} end
     )
-    |> put_if(true, {:"graphql.event.type", config.type})
+    |> List.insert_at(0, {:"graphql.event.type", config.type})
     |> Tracer.set_attributes()
 
     :telemetry.execute(
