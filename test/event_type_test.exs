@@ -4,10 +4,6 @@ defmodule OpentelemetryAbsintheTest.EvenType do
   alias OpentelemetryAbsintheTest.Support.GraphQL.Queries
   alias OpentelemetryAbsintheTest.Support.Query
 
-  @graphql_document :"graphql.document"
-  @graphql_operation_name :"graphql.operation.name"
-  @graphql_operation_type :"graphql.operation.type"
-  @graphql_request_selections :"graphql.request.selections"
   @graphql_event_type :"graphql.event.type"
 
   doctest OpentelemetryAbsinthe.Instrumentation
