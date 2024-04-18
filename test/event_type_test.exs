@@ -1,7 +1,6 @@
 defmodule OpentelemetryAbsintheTest.EventTypeTest do
   use OpentelemetryAbsintheTest.Case
 
-  alias OpentelemetryAbsintheTest.Support.Counter
   alias OpentelemetryAbsintheTest.Support.GraphQL.Queries
   alias OpentelemetryAbsintheTest.Support.Query
 
