@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.2.2-rc.0] - 2024-04-18
+
+### Added
+
+- Allow attaching to `[:absinthe, :subscription, :publish]` (both `:start` and `:stop`) given a `trace_subscription: true` config
+- New `graphql.event.type` trace attribute, with value `operation` or `publish`
+
 ## [2.2.1] - 2024-02-21
 
 ### Changed
@@ -64,7 +73,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   If you're upgrading to opentelemetry_absinthe 1.1.0, it is therefore recommended to also upgrade to OpenTelemetry API 1.1.0
   in order to keep the opentelemetry log metadata.
 
-[Unreleased]: https://github.com/primait/opentelemetry_absinthe/compare/2.0.1...HEAD
+
+[Unreleased]: https://github.com/primait/opentelemetry_absinthe/compare/2.2.2-rc.0...HEAD
+[2.2.2-rc.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.2.1...2.2.2-rc.0
 [2.0.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/primait/opentelemetry_absinthe/compare/1.1.0...2.0.0
 [1.1.0]: https://github.com/primait/opentelemetry_absinthe/compare/1.0.0...1.1.0

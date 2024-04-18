@@ -20,14 +20,16 @@ defmodule OpentelemetryAbsinthe do
   config :opentelemetry_absinthe,
     trace_options: [
       trace_request_query: false,
-      trace_response_error: true
+      trace_response_error: true,
+      ...
     ]
   ```
   configuration can also be passed directly to the setup function
   ```
   OpentelemetryAbsinthe.setup(
     trace_request_query: false,
-    trace_response_error: true
+    trace_response_error: true,
+    ...
   )
   ```
 
@@ -70,6 +72,7 @@ defmodule OpentelemetryAbsinthe do
 
     * `trace_response_result`(default: #{Keyword.fetch!(@config, :trace_response_result)}): attaches the result returned by the server as an attribute
     * `trace_response_errors`(default: #{Keyword.fetch!(@config, :trace_response_errors)}): attaches the errors returned by the server as an attribute
+    * `trace_subscriptions`(default: #{Keyword.fetch!(@config, :trace_subscriptions)}): attaches to `[:absinthe, :subscription, :publish]` (`:start` and `:stop`)
 
   ## Telemetry
 

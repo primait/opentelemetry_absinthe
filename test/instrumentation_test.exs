@@ -14,6 +14,7 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
 
   @trace_attributes [
     :"graphql.document",
+    :"graphql.event.type",
     :"graphql.operation.name",
     :"graphql.operation.type",
     :"graphql.request.selections",
@@ -22,13 +23,11 @@ defmodule OpentelemetryAbsintheTest.Instrumentation do
     :"graphql.response.result"
   ]
 
-  describe "query" do
-    test "doesn't crash when empty" do
-      OpentelemetryAbsinthe.Instrumentation.setup(@capture_all)
-      attrs = Query.query_for_attrs(Queries.empty_query())
+  test "doesn't crash when query is empty" do
+    OpentelemetryAbsinthe.Instrumentation.setup(@capture_all)
+    attrs = Query.query_for_attrs(Queries.empty_query())
 
-      assert @trace_attributes = attrs |> Map.keys() |> Enum.sort()
-    end
+    assert @trace_attributes = attrs |> Map.keys() |> Enum.sort()
   end
 
   test "handles multiple queries properly" do
