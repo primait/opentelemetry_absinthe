@@ -62,15 +62,9 @@ defmodule OpentelemetryAbsintheTest.EventTypeTest.TelemetryProvider do
     Agent.start_link(fn -> 0 end, name: @me)
   end
 
-  def count() do
-    Agent.get(@me, & &1)
-  end
+  def count, do: Agent.get(@me, & &1)
 
-  defp increment() do
-    Agent.update(@me, &(&1 + 1))
-  end
+  defp increment, do: Agent.update(@me, &(&1 + 1))
 
-  def attach(_, _, _, _) do
-    increment()
-  end
+  def attach(_, _, _, _), do: increment()
 end

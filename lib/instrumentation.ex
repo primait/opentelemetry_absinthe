@@ -222,5 +222,5 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   defp set_status(:ok), do: :ok
   defp set_status(:error), do: Tracer.set_status(OpenTelemetry.status(:error, ""))
 
-  defp telemetry_provider(), do: Application.get_env(:opentelemetry_absinthe, :telemetry_provider, :telemetry)
+  defp telemetry_provider, do: Application.get_env(:opentelemetry_absinthe, :telemetry_provider, :telemetry)
 end
