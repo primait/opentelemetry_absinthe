@@ -2,7 +2,7 @@ defmodule OpentelemetryAbsinthe.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/primait/opentelemetry_absinthe"
-  @version "2.2.2-rc.0"
+  @version "2.3.0-rc.0"
 
   def project do
     [
