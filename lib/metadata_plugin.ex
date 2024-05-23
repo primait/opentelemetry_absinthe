@@ -3,7 +3,7 @@ defmodule OpenTelemetryAbsinthe.MetadataPlugin do
     A MetadataPlugin is used to allow library integrators to add their own
     metadata to the broadcasted telemetry events.
 
-    Note: plugins are run after `OpenTelemetryAbsinthe.MetadataPlugin.StandardMetadata`
+    Note: plugins are run after `OpenTelemetryAbsinthe.StandardMetadataPlugin`
     so they should avoid the keys:
     ```
       operation_name
