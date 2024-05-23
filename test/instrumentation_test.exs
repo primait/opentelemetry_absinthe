@@ -115,6 +115,7 @@ defmodule OpentelemetryAbsintheTest.InstrumentationTest.TestMetadataPlugin do
 
   alias Absinthe.Blueprint
 
+  @impl OpenTelemetryAbsinthe.MetadataPlugin
   def metadata(%Blueprint{} = blueprint) do
     %{
       plugin_name: __MODULE__,
