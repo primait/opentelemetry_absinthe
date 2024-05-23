@@ -9,6 +9,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   code, it just won't do anything.)
   """
   alias Absinthe.Blueprint
+  alias OpenTelemetryAbsinthe.StandardMetadataPlugin
 
   require OpenTelemetry.Tracer, as: Tracer
   require OpenTelemetry.SemanticConventions.Trace, as: Conventions
@@ -53,7 +54,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     trace_request_selections: true,
     trace_response_result: false,
     trace_response_errors: false,
-    trace_subscriptions: false
+    trace_subscriptions: false,
+    metadata_plugins: []
   ]
 
   def setup(instrumentation_opts \\ []) do
@@ -127,8 +129,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   end
 
   def handle_stop(_event_name, measurements, data, config) do
-    operation_type = get_operation_type(data)
-    operation_name = get_operation_name(data)
+    operation_type = StandardMetadataPlugin.get_operation_type(data.blueprint)
+    operation_name = StandardMetadataPlugin.get_operation_name(data.blueprint)
 
     operation_type
     |> span_name(operation_name, config.span_name)
@@ -150,16 +152,17 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     |> List.insert_at(0, {:"graphql.event.type", config.type})
     |> Tracer.set_attributes()
 
+    plugins = [StandardMetadataPlugin | config.metadata_plugins]
+
+    metadata =
+      Enum.reduce(plugins, %{}, fn plugin, metadata ->
+        Map.merge(metadata, plugin.metadata(data.blueprint))
+      end)
+
     telemetry_provider().execute(
       [:opentelemetry_absinthe, :graphql, :handled],
       measurements,
-      %{
-        operation_name: operation_name,
-        operation_type: operation_type,
-        schema: data.blueprint.schema,
-        errors: errors,
-        status: status
-      }
+      metadata
     )
 
     Tracer.end_span()
@@ -179,14 +182,6 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
   def default_config do
     @default_config
-  end
-
-  defp get_operation_type(%{blueprint: %Blueprint{} = blueprint}) do
-    blueprint |> Absinthe.Blueprint.current_operation() |> Kernel.||(%{}) |> Map.get(:type)
-  end
-
-  defp get_operation_name(%{blueprint: %Blueprint{} = blueprint}) do
-    blueprint |> Absinthe.Blueprint.current_operation() |> Kernel.||(%{}) |> Map.get(:name)
   end
 
   defp span_name(_, _, name) when is_binary(name), do: name
