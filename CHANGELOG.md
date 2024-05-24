@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support custom metadata from integrators. Use `OpenTelemetryAbsinthe.TelemetryMetadata` to add metadata to your context which will then be broadcast.
+- Support custom metadata from integrators. Use `OpentelemetryAbsinthe.TelemetryMetadata` to add metadata to your context which will then be broadcast.
 
 ## [2.3.0-rc.0] - 2024-04-18
 
