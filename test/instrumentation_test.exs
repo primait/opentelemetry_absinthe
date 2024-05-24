@@ -2,7 +2,7 @@ defmodule OpentelemetryAbsintheTest.InstrumentationTest do
   use OpentelemetryAbsintheTest.Case
 
   alias OpentelemetryAbsinthe.Instrumentation
-  alias OpenTelemetryAbsinthe.TelemetryMetadata
+  alias OpentelemetryAbsinthe.TelemetryMetadata
   alias OpentelemetryAbsintheTest.Support.GraphQL.Queries
   alias OpentelemetryAbsintheTest.Support.Query
 
@@ -79,7 +79,7 @@ defmodule OpentelemetryAbsintheTest.InstrumentationTest do
     end
 
     test "standard values are returned alongside the metadata from context", ctx do
-      context = TelemetryMetadata.put_telemetry_metadata(%{}, %{source: "TestSource", user_agent: "Insomnia"})
+      context = TelemetryMetadata.update_context(%{}, %{source: "TestSource", user_agent: "Insomnia"})
 
       blueprint =
         BlueprintArchitect.blueprint(schema: __MODULE__, execution: BlueprintArchitect.execution(context: context))

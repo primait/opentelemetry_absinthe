@@ -9,7 +9,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   code, it just won't do anything.)
   """
   alias Absinthe.Blueprint
-  alias OpenTelemetryAbsinthe.TelemetryMetadata
+  alias OpentelemetryAbsinthe.TelemetryMetadata
 
   require OpenTelemetry.Tracer, as: Tracer
   require OpenTelemetry.SemanticConventions.Trace, as: Conventions
@@ -17,11 +17,12 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   require Record
 
   @type graphql_handled_event_metadata :: %{
-          operation_name: String.t() | nil,
-          operation_type: :query | :mutation,
-          schema: Absinthe.Schema.t(),
-          errors: [graphql_handled_event_error()] | nil,
-          status: :ok | :error
+          required(:operation_name) => String.t() | nil,
+          required(:operation_type) => :query | :mutation,
+          required(:schema) => Absinthe.Schema.t(),
+          required(:errors) => [graphql_handled_event_error()] | nil,
+          required(:status) => :ok | :error,
+          optional(atom()) => any()
         }
 
   @type graphql_handled_event_error :: %{
@@ -162,7 +163,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
           errors: errors,
           status: status
         },
-        TelemetryMetadata.get_telemetry_metadata(data.blueprint.execution.context)
+        TelemetryMetadata.from_context(data.blueprint.execution.context)
       )
     )
 

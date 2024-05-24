@@ -1,4 +1,4 @@
-defmodule OpenTelemetryAbsinthe.TelemetryMetadata do
+defmodule OpentelemetryAbsinthe.TelemetryMetadata do
   @moduledoc """
     A helper module to allow integrators to add custom data to their context
     which will then be added to the [:opentelemetry_absinthe, :graphql, :handled]
@@ -11,10 +11,10 @@ defmodule OpenTelemetryAbsinthe.TelemetryMetadata do
           optional(atom()) => any()
         }
 
-  @spec put_telemetry_metadata(absinthe_context(), telemetry_metadata()) :: absinthe_context()
-  def put_telemetry_metadata(%{} = context, %{} = metadata),
+  @spec update_context(absinthe_context(), telemetry_metadata()) :: absinthe_context()
+  def update_context(%{} = context, %{} = metadata),
     do: Map.update(context, @key, metadata, &Map.merge(&1, metadata))
 
-  @spec get_telemetry_metadata(absinthe_context()) :: telemetry_metadata()
-  def get_telemetry_metadata(%{} = context), do: Map.get(context, @key, %{})
+  @spec from_context(absinthe_context()) :: telemetry_metadata()
+  def from_context(%{} = context), do: Map.get(context, @key, %{})
 end
