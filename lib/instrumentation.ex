@@ -9,6 +9,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   code, it just won't do anything.)
   """
   alias Absinthe.Blueprint
+  alias OpenTelemetryAbsinthe.TelemetryMetadata
 
   require OpenTelemetry.Tracer, as: Tracer
   require OpenTelemetry.SemanticConventions.Trace, as: Conventions
@@ -153,13 +154,16 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     telemetry_provider().execute(
       [:opentelemetry_absinthe, :graphql, :handled],
       measurements,
-      %{
-        operation_name: operation_name,
-        operation_type: operation_type,
-        schema: data.blueprint.schema,
-        errors: errors,
-        status: status
-      }
+      Map.merge(
+        %{
+          operation_name: operation_name,
+          operation_type: operation_type,
+          schema: data.blueprint.schema,
+          errors: errors,
+          status: status
+        },
+        TelemetryMetadata.get_telemetry_metadata(data.blueprint.execution.context)
+      )
     )
 
     Tracer.end_span()
