@@ -9,11 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.3.1] - 2024-05-24
+## [2.3.0] - 2024-05-27
 
 ### Added
 
 - Support custom metadata from integrators. Use `OpentelemetryAbsinthe.TelemetryMetadata` to add metadata to your context which will then be broadcast.
+- Allow attaching to `[:absinthe, :subscription, :publish]` (both `:start` and `:stop`) given a `trace_subscription: true` config
+- New `graphql.event.type` trace attribute, with value `operation` or `publish`
 
 ## [2.3.0-rc.0] - 2024-04-18
 
@@ -80,8 +82,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   in order to keep the opentelemetry log metadata.
 
 
-[Unreleased]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.0-rc.0...HEAD
-[2.2.2-rc.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.2.1...2.3.0-rc.0
+
+[Unreleased]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.0...HEAD
+[2.3.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.0-rc.0...2.3.0
+[2.3.0-rc.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.2.1...2.3.0-rc.0
+[2.2.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.2.0...2.2.1
+[2.1.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.1.0...2.2.0
+[2.0.1]: https://github.com/primait/opentelemetry_absinthe/compare/2.0.1...2.1.0
 [2.0.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/primait/opentelemetry_absinthe/compare/1.1.0...2.0.0
 [1.1.0]: https://github.com/primait/opentelemetry_absinthe/compare/1.0.0...1.1.0
