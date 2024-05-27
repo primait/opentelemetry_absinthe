@@ -9,6 +9,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   code, it just won't do anything.)
   """
   alias Absinthe.Blueprint
+  alias OpentelemetryAbsinthe.TelemetryMetadata
 
   require OpenTelemetry.Tracer, as: Tracer
   require OpenTelemetry.SemanticConventions.Trace, as: Conventions
@@ -16,11 +17,12 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   require Record
 
   @type graphql_handled_event_metadata :: %{
-          operation_name: String.t() | nil,
-          operation_type: :query | :mutation,
-          schema: Absinthe.Schema.t(),
-          errors: [graphql_handled_event_error()] | nil,
-          status: :ok | :error
+          required(:operation_name) => String.t() | nil,
+          required(:operation_type) => :query | :mutation,
+          required(:schema) => Absinthe.Schema.t(),
+          required(:errors) => [graphql_handled_event_error()] | nil,
+          required(:status) => :ok | :error,
+          optional(atom()) => any()
         }
 
   @type graphql_handled_event_error :: %{
@@ -153,13 +155,16 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     telemetry_provider().execute(
       [:opentelemetry_absinthe, :graphql, :handled],
       measurements,
-      %{
-        operation_name: operation_name,
-        operation_type: operation_type,
-        schema: data.blueprint.schema,
-        errors: errors,
-        status: status
-      }
+      Map.merge(
+        %{
+          operation_name: operation_name,
+          operation_type: operation_type,
+          schema: data.blueprint.schema,
+          errors: errors,
+          status: status
+        },
+        TelemetryMetadata.from_context(data.blueprint.execution.context)
+      )
     )
 
     Tracer.end_span()
