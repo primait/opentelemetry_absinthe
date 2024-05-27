@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Support custom metadata from integrators. Use `OpentelemetryAbsinthe.TelemetryMetadata` to add metadata to your context which will then be broadcast.
+- Allow attaching to `[:absinthe, :subscription, :publish]` (both `:start` and `:stop`) given a `trace_subscription: true` config
+- New `graphql.event.type` trace attribute, with value `operation` or `publish`
 
 ## [2.3.0-rc.0] - 2024-04-18
 
