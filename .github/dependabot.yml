@@ -9,3 +9,8 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    groups:
+      # Dependencies that need to be kept in sync
+      opentelemetry:
+        patterns:
+          - "opentelemetry*"
