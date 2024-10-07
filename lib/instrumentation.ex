@@ -12,7 +12,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   alias OpentelemetryAbsinthe.TelemetryMetadata
 
   require OpenTelemetry.Tracer, as: Tracer
-  require OpenTelemetry.SemConv.Incubating.Graphql, as: GraphqlConventions
+  require OpenTelemetry.SemConv.Incubating.GraphqlAttributes, as: GraphqlConventions
   require Logger
   require Record
 
