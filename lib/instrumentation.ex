@@ -12,7 +12,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   alias OpentelemetryAbsinthe.TelemetryMetadata
 
   require OpenTelemetry.Tracer, as: Tracer
-  require OpenTelemetry.SemanticConventions.Trace, as: Conventions
+  require OpenTelemetry.SemConv.Incubating.GraphqlAttributes, as: GraphqlConventions
   require Logger
   require Record
 
@@ -42,9 +42,9 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   Record.defrecord(:span_ctx, @span_ctx_fields)
 
   @default_operation_span "GraphQL Operation"
-  @graphql_document Conventions.graphql_document()
-  @graphql_operation_name Conventions.graphql_operation_name()
-  @graphql_operation_type Conventions.graphql_operation_type()
+  @graphql_document GraphqlConventions.graphql_document()
+  @graphql_operation_name GraphqlConventions.graphql_operation_name()
+  @graphql_operation_type GraphqlConventions.graphql_operation_type()
 
   @default_config [
     span_name: :dynamic,
