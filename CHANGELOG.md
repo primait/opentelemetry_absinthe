@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+---
+
+## [2.3.1] - 2024-10-09
+
 ### Changed
 
 - Use `opentelemetry_semantic_conventions` 1.x
@@ -103,7 +107,9 @@ and this project adheres to
   recommended to also upgrade to OpenTelemetry API 1.1.0 in order to keep the
   opentelemetry log metadata.
 
-[Unreleased]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.0...HEAD
+
+[Unreleased]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.1...HEAD
+[2.3.1]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.0...2.3.1
 [2.3.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.0-rc.0...2.3.0
 [2.3.0-rc.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.2.1...2.3.0-rc.0
 [2.2.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.2.0...2.2.1
