@@ -8,4 +8,9 @@ updates:
   - package-ecosystem: mix # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    groups:
+      # Dependencies that need to be kept in sync
+      opentelemetry:
+        patterns:
+          - "opentelemetry*"
