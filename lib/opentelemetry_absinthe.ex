@@ -73,6 +73,8 @@ defmodule OpentelemetryAbsinthe do
     * `trace_response_result`(default: #{Keyword.fetch!(@config, :trace_response_result)}): attaches the result returned by the server as an attribute
     * `trace_response_errors`(default: #{Keyword.fetch!(@config, :trace_response_errors)}): attaches the errors returned by the server as an attribute
     * `trace_subscriptions`(default: #{Keyword.fetch!(@config, :trace_subscriptions)}): attaches to `[:absinthe, :subscription, :publish]` (`:start` and `:stop`)
+    * `status_function`(default: #{Keyword.fetch!(@config, :status_function)}): a `{module, function}` tuple for a function which will be executed to infer the status
+    of the trace. This function __must__ return `:ok | :error`
 
   ## Telemetry
 
