@@ -55,7 +55,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     trace_request_selections: true,
     trace_response_result: false,
     trace_response_errors: false,
-    trace_subscriptions: false
+    trace_subscriptions: false,
+    status_function: nil
   ]
 
   def setup(instrumentation_opts \\ []) do
@@ -137,7 +138,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     |> Tracer.update_name()
 
     errors = data.blueprint.result[:errors]
-    status = status(errors)
+    status = status(errors, data, config)
     set_status(status)
 
     []
@@ -174,12 +175,15 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   end
 
   defp get_graphql_selections(%{blueprint: %Blueprint{} = blueprint}) do
-    blueprint
-    |> Blueprint.current_operation()
-    |> Kernel.||(%{})
-    |> Map.get(:selections, [])
-    |> Enum.map(& &1.name)
-    |> Enum.uniq()
+    case Blueprint.current_operation(blueprint) do
+      %{selections: [_ | _] = selections} ->
+        selections
+        |> Enum.map(&Map.fetch!(&1, :name))
+        |> Enum.uniq()
+
+      _ ->
+        []
+    end
   end
 
   def default_config do
@@ -220,9 +224,20 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     Tracer.set_current_span(ctx)
   end
 
-  defp status(nil), do: :ok
-  defp status([]), do: :ok
-  defp status(_error), do: :error
+  defp status(_errors, data, %{status_function: {module, function}}) do
+    case apply(module, function, [data]) do
+      expected when expected in [:ok, :error] ->
+        expected
+
+      other ->
+        Logger.error("Unexpected value returned by status function #{inspect(other)}")
+        :error
+    end
+  end
+
+  defp status(nil, _, _), do: :ok
+  defp status([], _, _), do: :ok
+  defp status(_error, _, _), do: :error
 
   defp set_status(:ok), do: :ok
   defp set_status(:error), do: Tracer.set_status(OpenTelemetry.status(:error, ""))
