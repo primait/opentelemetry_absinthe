@@ -78,6 +78,43 @@ defmodule OpentelemetryAbsintheTest.InstrumentationTest do
                      10
     end
 
+    test "status function works", ctx do
+      defmodule Helper do
+        def status_function(_) do
+          :error
+        end
+      end
+
+      config = %{ctx.config | status_function: {Helper, :status_function}}
+
+      assert :ok =
+               :telemetry.attach(
+                 ctx.test,
+                 [:opentelemetry_absinthe, :graphql, :handled],
+                 fn _telemetry_event, _measurements, metadata, _config ->
+                   send(self(), metadata)
+                 end,
+                 nil
+               )
+
+      assert :ok =
+               Instrumentation.handle_stop(
+                 "Test",
+                 %{},
+                 %{blueprint: BlueprintArchitect.blueprint(schema: __MODULE__)},
+                 config
+               )
+
+      assert_receive %{
+                       operation_name: "TestOperation",
+                       operation_type: :query,
+                       schema: __MODULE__,
+                       errors: nil,
+                       status: :error
+                     },
+                     10
+    end
+
     test "standard values are returned alongside the metadata from context", ctx do
       context = TelemetryMetadata.update_context(%{}, %{source: "TestSource", user_agent: "Insomnia"})
 
