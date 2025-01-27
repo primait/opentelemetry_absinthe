@@ -20,7 +20,7 @@ defmodule OpentelemetryAbsinthe do
   config :opentelemetry_absinthe,
     trace_options: [
       trace_request_query: false,
-      trace_response_error: true,
+      trace_response_errors: true,
       ...
     ]
   ```
@@ -28,7 +28,7 @@ defmodule OpentelemetryAbsinthe do
   ```
   OpentelemetryAbsinthe.setup(
     trace_request_query: false,
-    trace_response_error: true,
+    trace_response_errors: true,
     ...
   )
   ```
