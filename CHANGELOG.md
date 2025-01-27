@@ -10,6 +10,14 @@ and this project adheres to
 
 ---
 
+## [2.3.2] - 2025-01-27
+
+### Fixed
+
+- Docs work properly now, thanks to @hissssst
+
+---
+
 ## [2.3.1] - 2024-10-09
 
 ### Changed
@@ -108,7 +116,9 @@ and this project adheres to
   opentelemetry log metadata.
 
 
-[Unreleased]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.1...HEAD
+
+[Unreleased]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.2...HEAD
+[2.3.2]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.1...2.3.2
 [2.3.1]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.0...2.3.1
 [2.3.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.0-rc.0...2.3.0
 [2.3.0-rc.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.2.1...2.3.0-rc.0
