@@ -139,7 +139,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
     errors = data.blueprint.result[:errors]
     status = status(errors, data, config)
-    set_status(status)
+    set_status(status, errors)
 
     []
     |> put_if(config.trace_request_type, {@graphql_operation_type, operation_type})
@@ -239,8 +239,16 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   defp status([], _, _), do: :ok
   defp status(_error, _, _), do: :error
 
-  defp set_status(:ok), do: :ok
-  defp set_status(:error), do: Tracer.set_status(OpenTelemetry.status(:error, ""))
+  defp set_status(:ok, _), do: :ok
+
+  defp set_status(:error, [error | _]) do
+    error_message = Map.get(error, :message, "Unknown error")
+    Tracer.set_status(OpenTelemetry.status(:error, error_message))
+  end
+
+  defp set_status(:error, _error) do
+    Tracer.set_status(OpenTelemetry.status(:error, "Unknown error"))
+  end
 
   defp telemetry_provider, do: Application.get_env(:opentelemetry_absinthe, :telemetry_provider, :telemetry)
 end
