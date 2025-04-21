@@ -9,6 +9,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   code, it just won't do anything.)
   """
   alias Absinthe.Blueprint
+  alias Absinthe.Phase.Error
   alias OpentelemetryAbsinthe.TelemetryMetadata
 
   require OpenTelemetry.Tracer, as: Tracer
@@ -241,13 +242,22 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
   defp set_status(:ok, _), do: :ok
 
-  defp set_status(:error, [error | _]) do
-    error_message = Map.get(error, :message, "Unknown error")
-    Tracer.set_status(OpenTelemetry.status(:error, error_message))
+  defp set_status(:error, [error]) do
+    case error do
+      %Error{} = error -> Tracer.set_status(OpenTelemetry.status(:error, error.message))
+      error -> Tracer.set_status(OpenTelemetry.status(:error, inspect(error)))
+    end
   end
 
-  defp set_status(:error, _error) do
-    Tracer.set_status(OpenTelemetry.status(:error, "Unknown error"))
+  defp set_status(:error, errors) when is_list(errors) and length(errors) > 1 do
+    Tracer.set_status(OpenTelemetry.status(:error, "GraphQL request resulted in multiple errors"))
+
+    Enum.each(errors, fn error ->
+      case error do
+        %Error{} = error -> Tracer.add_event("GraphQL error", %{message: error.message})
+        error -> Tracer.add_event("GraphQL error", %{message: inspect(error)})
+      end
+    end)
   end
 
   defp telemetry_provider, do: Application.get_env(:opentelemetry_absinthe, :telemetry_provider, :telemetry)
