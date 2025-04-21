@@ -253,9 +253,11 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     Tracer.set_status(OpenTelemetry.status(:error, "GraphQL request resulted in multiple errors"))
 
     Enum.each(errors, fn error ->
+      event_name = "graphql.error"
+
       case error do
-        %Error{} = error -> Tracer.add_event("GraphQL error", %{message: error.message})
-        error -> Tracer.add_event("GraphQL error", %{message: inspect(error)})
+        %Error{} = error -> Tracer.add_event(event_name, %{message: error.message})
+        error -> Tracer.add_event(event_name, %{message: inspect(error)})
       end
     end)
   end
