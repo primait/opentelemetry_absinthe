@@ -242,11 +242,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   defp set_status(:ok, _), do: :ok
 
   defp set_status(:error, [error]) do
-    case Map.get(error, :message) do
-      message when is_binary(message) -> Tracer.set_status(OpenTelemetry.status(:error, message))
-      message when is_atom(message) -> Tracer.set_status(OpenTelemetry.status(:error, Atom.to_string(message)))
-      _ -> Tracer.set_status(OpenTelemetry.status(:error, inspect(error)))
-    end
+    Tracer.set_status(OpenTelemetry.status(:error, error_message(error)))
   end
 
   defp set_status(:error, errors) when is_list(errors) and length(errors) > 1 do
@@ -254,13 +250,16 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
     Enum.each(errors, fn error ->
       event_name = "graphql.error"
-
-      case Map.get(error, :message) do
-        message when is_binary(message) -> Tracer.add_event(event_name, %{message: message})
-        message when is_atom(message) -> Tracer.add_event(event_name, %{message: Atom.to_string(message)})
-        _ -> Tracer.add_event(event_name, %{message: inspect(error)})
-      end
+      Tracer.add_event(event_name, %{message: error_message(error)})
     end)
+  end
+
+  defp error_message(error) do
+    case Map.get(error, :message) do
+      message when is_binary(message) -> message
+      message when is_atom(message) -> Atom.to_string(message)
+      _ -> inspect(error)
+    end
   end
 
   defp telemetry_provider, do: Application.get_env(:opentelemetry_absinthe, :telemetry_provider, :telemetry)
