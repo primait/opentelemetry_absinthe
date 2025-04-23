@@ -244,6 +244,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   defp set_status(:error, [error]) do
     case Map.get(error, :message) do
       message when is_binary(message) -> Tracer.set_status(OpenTelemetry.status(:error, message))
+      message when is_atom(message) -> Tracer.set_status(OpenTelemetry.status(:error, Atom.to_string(message)))
       _ -> Tracer.set_status(OpenTelemetry.status(:error, inspect(error)))
     end
   end
@@ -256,6 +257,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
       case Map.get(error, :message) do
         message when is_binary(message) -> Tracer.add_event(event_name, %{message: message})
+        message when is_atom(message) -> Tracer.add_event(event_name, %{message: Atom.to_string(message)})
         _ -> Tracer.add_event(event_name, %{message: inspect(error)})
       end
     end)
