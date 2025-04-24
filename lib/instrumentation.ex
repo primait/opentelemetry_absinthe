@@ -9,7 +9,6 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   code, it just won't do anything.)
   """
   alias Absinthe.Blueprint
-  alias Absinthe.Phase.Error
   alias OpentelemetryAbsinthe.TelemetryMetadata
 
   require OpenTelemetry.Tracer, as: Tracer
@@ -264,8 +263,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     end
   end
 
-  defp error_path(%Error{path: path}) when is_list(path), do: Enum.join(path, ",")
-  defp error_path(_), do: ""
+  defp error_path(%{path: path}) when is_list(path), do: Enum.join(path, ",")
+  defp error_path(_), do: nil
 
   defp telemetry_provider, do: Application.get_env(:opentelemetry_absinthe, :telemetry_provider, :telemetry)
 end
