@@ -9,6 +9,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   code, it just won't do anything.)
   """
   alias Absinthe.Blueprint
+  alias Absinthe.Phase.Error
   alias OpentelemetryAbsinthe.TelemetryMetadata
 
   require OpenTelemetry.Tracer, as: Tracer
@@ -243,6 +244,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
   defp set_status(:error, [error]) do
     Tracer.set_status(OpenTelemetry.status(:error, error_message(error)))
+    Tracer.add_event("graphql.error", %{path: error_path(error)})
   end
 
   defp set_status(:error, errors) when is_list(errors) and length(errors) > 1 do
@@ -250,7 +252,7 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
 
     Enum.each(errors, fn error ->
       event_name = "graphql.error"
-      Tracer.add_event(event_name, %{message: error_message(error)})
+      Tracer.add_event(event_name, %{message: error_message(error), path: error_path(error)})
     end)
   end
 
@@ -261,6 +263,9 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
       _ -> inspect(error)
     end
   end
+
+  defp error_path(%Error{path: path}) when is_list(path), do: Enum.join(path, ",")
+  defp error_path(_), do: ""
 
   defp telemetry_provider, do: Application.get_env(:opentelemetry_absinthe, :telemetry_provider, :telemetry)
 end
