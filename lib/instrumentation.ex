@@ -263,8 +263,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     end
   end
 
-  defp error_path(%{path: path}) when is_list(path), do: Enum.join(path, ",")
-  defp error_path(_), do: nil
+  defp error_path(%{path: path}) when is_list(path), do: path
+  defp error_path(_), do: []
 
   defp telemetry_provider, do: Application.get_env(:opentelemetry_absinthe, :telemetry_provider, :telemetry)
 end
