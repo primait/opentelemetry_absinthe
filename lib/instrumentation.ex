@@ -55,7 +55,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     trace_request_selections: true,
     trace_response_result: false,
     trace_response_errors: false,
-    trace_subscriptions: false
+    trace_subscriptions: false,
+    status_function: nil
   ]
 
   def setup(instrumentation_opts \\ []) do
@@ -137,8 +138,8 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     |> Tracer.update_name()
 
     errors = data.blueprint.result[:errors]
-    status = status(errors)
-    set_status(status)
+    status = status(errors, data, config)
+    set_status(status, errors)
 
     []
     |> put_if(config.trace_request_type, {@graphql_operation_type, operation_type})
@@ -174,12 +175,15 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
   end
 
   defp get_graphql_selections(%{blueprint: %Blueprint{} = blueprint}) do
-    blueprint
-    |> Blueprint.current_operation()
-    |> Kernel.||(%{})
-    |> Map.get(:selections, [])
-    |> Enum.map(& &1.name)
-    |> Enum.uniq()
+    case Blueprint.current_operation(blueprint) do
+      %{selections: [_ | _] = selections} ->
+        selections
+        |> Enum.map(&Map.fetch!(&1, :name))
+        |> Enum.uniq()
+
+      _ ->
+        []
+    end
   end
 
   def default_config do
@@ -220,12 +224,47 @@ defmodule OpentelemetryAbsinthe.Instrumentation do
     Tracer.set_current_span(ctx)
   end
 
-  defp status(nil), do: :ok
-  defp status([]), do: :ok
-  defp status(_error), do: :error
+  defp status(_errors, data, %{status_function: {module, function}}) do
+    case apply(module, function, [data]) do
+      expected when expected in [:ok, :error] ->
+        expected
 
-  defp set_status(:ok), do: :ok
-  defp set_status(:error), do: Tracer.set_status(OpenTelemetry.status(:error, ""))
+      other ->
+        Logger.error("Unexpected value returned by status function #{inspect(other)}")
+        :error
+    end
+  end
+
+  defp status(nil, _, _), do: :ok
+  defp status([], _, _), do: :ok
+  defp status(_error, _, _), do: :error
+
+  defp set_status(:ok, _), do: :ok
+
+  defp set_status(:error, [error]) do
+    Tracer.set_status(OpenTelemetry.status(:error, error_message(error)))
+    Tracer.add_event("graphql.error", %{path: error_path(error)})
+  end
+
+  defp set_status(:error, errors) when is_list(errors) and length(errors) > 1 do
+    Tracer.set_status(OpenTelemetry.status(:error, "GraphQL request resulted in multiple errors"))
+
+    Enum.each(errors, fn error ->
+      event_name = "graphql.error"
+      Tracer.add_event(event_name, %{message: error_message(error), path: error_path(error)})
+    end)
+  end
+
+  defp error_message(error) do
+    case Map.get(error, :message) do
+      message when is_binary(message) -> message
+      message when is_atom(message) -> Atom.to_string(message)
+      _ -> inspect(error)
+    end
+  end
+
+  defp error_path(%{path: path}) when is_list(path), do: path
+  defp error_path(_), do: []
 
   defp telemetry_provider, do: Application.get_env(:opentelemetry_absinthe, :telemetry_provider, :telemetry)
 end
