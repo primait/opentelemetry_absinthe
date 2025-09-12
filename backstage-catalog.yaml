@@ -1,0 +1,21 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+spec:
+  type: library
+  lifecycle: production
+  owner: team-developer-experience
+  system: prima.it
+metadata:
+  name: opentelemetry_absinthe
+  description: An OpenTelemetry instrumentation library for Absinthe
+  tags:
+  - elixir
+  links:
+  - url: https://hex.pm/packages/opentelemetry_absinthe
+    icon: link
+    title: hex page
+
+  - url: https://hexdocs.pm/opentelemetry_absinthe/api-reference.html
+    icon: link
+    title: official documentation
+
