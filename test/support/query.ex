@@ -6,7 +6,7 @@ defmodule OpentelemetryAbsintheTest.Support.Query do
   require Record
   require Logger
 
-  @fields Record.extract(:span, from: "deps/opentelemetry/include/otel_span.hrl")
+  @fields Record.extract(:span, from_lib: "opentelemetry/include/otel_span.hrl")
   Record.defrecordp(:span, @fields)
 
   def query_for_span(query, opts \\ []) do
