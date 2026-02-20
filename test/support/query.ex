@@ -34,4 +34,9 @@ defmodule OpentelemetryAbsintheTest.Support.Query do
     span(kind: kind) = query_for_span(query, opts)
     kind
   end
+
+  def query_for_status(query, opts \\ []) do
+    span(status: status) = query_for_span(query, opts)
+    status
+  end
 end
