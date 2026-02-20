@@ -10,6 +10,14 @@ and this project adheres to
 
 ---
 
+## [2.4.0] - 2026-02-20
+
+### Added
+
+- Add `error_status` option to control span error classification (#221)
+
+---
+
 ## [2.3.2] - 2025-01-27
 
 ### Fixed
@@ -116,8 +124,8 @@ and this project adheres to
   opentelemetry log metadata.
 
 
-
-[Unreleased]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.2...HEAD
+[Unreleased]: https://github.com/primait/opentelemetry_absinthe/compare/2.4.0...HEAD
+[2.4.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.2...2.4.0
 [2.3.2]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.1...2.3.2
 [2.3.1]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.0...2.3.1
 [2.3.0]: https://github.com/primait/opentelemetry_absinthe/compare/2.3.0-rc.0...2.3.0
