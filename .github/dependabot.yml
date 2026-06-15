@@ -14,3 +14,14 @@ updates:
       opentelemetry:
         patterns:
           - "opentelemetry*"
+  - package-ecosystem: docker
+    directories:
+      - "*"
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
