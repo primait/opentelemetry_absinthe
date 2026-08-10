@@ -2,7 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 spec:
   type: library
-  lifecycle: production
+  lifecycle: archived
   owner: team-developer-experience
   system: prima.it
 metadata:
